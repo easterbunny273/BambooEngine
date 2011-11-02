@@ -1,3 +1,0 @@
-DEBUG: SceneObject_Camera created
-DEBUG: Loading shader source: shaders/posteffect1.vs
-FATAL: Could not read shader source code from shaders/posteffect1.vs
