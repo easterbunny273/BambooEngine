@@ -1,0 +1,43 @@
+DEBUG: SceneObject_Camera created
+DEBUG: Loading shader source: shaders/posteffect1.vs
+DEBUG: Successfully compiled shader shaders/posteffect1.vs
+DEBUG: Loading shader source: shaders/posteffect1.fs
+DEBUG: Successfully compiled shader shaders/posteffect1.fs
+DEBUG: Successfully linked shader program
+DEBUG: 32 texture units available
+DEBUG: DevIL initialized
+DEBUG: Registered manual texture "scene_color1" with id 1
+DEBUG: Registered manual texture "scene_depth1" with id 2
+DEBUG: Initialized FBO
+DEBUG: SceneObject_PostEffect created
+DEBUG: Loading shader source: shaders/basic_shading.vs
+DEBUG: Successfully compiled shader shaders/basic_shading.vs
+DEBUG: Loading shader source: shaders/basic_shading.fs
+DEBUG: Successfully compiled shader shaders/basic_shading.fs
+DEBUG: Successfully linked shader program
+DEBUG: try to load texture from "textures/cube_texture.jpg"
+DEBUG: texture from textures/cube_texture.jpg loaded to intern name "cube_texture"
+DEBUG: SceneObject_Cube created
+DEBUG: Loading shader source: shaders/sceneobject-assimpimport.vs
+DEBUG: Successfully compiled shader shaders/sceneobject-assimpimport.vs
+DEBUG: Loading shader source: shaders/sceneobject-assimpimport.fs
+DEBUG: Successfully compiled shader shaders/sceneobject-assimpimport.fs
+DEBUG: Successfully linked shader program
+DEBUG: Loading shader source: shaders/simple-shading.vs
+DEBUG: Successfully compiled shader shaders/simple-shading.vs
+DEBUG: Loading shader source: shaders/simple-shading.fs
+DEBUG: Successfully compiled shader shaders/simple-shading.fs
+DEBUG: Successfully linked shader program
+DEBUG: Loaded file models/freepool-ng-table.3ds with assimp
+DEBUG: try to load texture from "textures/models/holz.bmp"
+DEBUG: texture from textures/models/holz.bmp loaded to intern name "AssimpImport_#textures/models/holz.bmp"
+DEBUG: try to load texture from "textures/models/holz.bmp.normals"
+DEBUG: texture from textures/models/holz.bmp.normals loaded to intern name "AssimpImport_#textures/models/holz.bmp_NORMAL"
+DEBUG: try to load texture from "textures/models/holz.bmp.bump"
+ERROR: Could not find texture file textures/models/holz.bmp.bump, loading failed. DevIL error-code: 1291
+DEBUG: try to load texture from "textures/models/green.bmp"
+DEBUG: texture from textures/models/green.bmp loaded to intern name "AssimpImport_#textures/models/green.bmp"
+DEBUG: try to load texture from "textures/models/green.bmp.normals"
+DEBUG: texture from textures/models/green.bmp.normals loaded to intern name "AssimpImport_#textures/models/green.bmp_NORMAL"
+DEBUG: try to load texture from "textures/models/green.bmp.bump"
+ERROR: Could not find texture file textures/models/green.bmp.bump, loading failed. DevIL error-code: 1291
