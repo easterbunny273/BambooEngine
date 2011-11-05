@@ -3,8 +3,8 @@
 #ifndef __bambooengine_cube_header
 #define __bambooengine_cube_header
 
-#include "Graphics/Graphic.h"
-#include "Graphics/SceneObjects/ISceneObject.h"
+#include "Graphic.h"
+#include "SceneObjects/ISceneObject.h"
 
 class Bamboo::SO_Cube : public Bamboo::ISceneObject
 {

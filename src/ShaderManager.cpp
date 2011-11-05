@@ -1,7 +1,7 @@
 #include <string>
 #include <algorithm>
 
-#include "Graphics/ShaderManager.h"
+#include "ShaderManager.h"
 #include "Logger.h"
 
 using namespace std;

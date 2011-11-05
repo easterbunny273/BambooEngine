@@ -14,7 +14,7 @@
 #include <string>
 #include <map>
 #include <glm/glm.hpp>
-#include "Graphics/RenderNodes/IRenderNode.h"
+#include "RenderNodes/IRenderNode.h"
 
 //!  A SceneObject which draws a texture full screen.
 /*!

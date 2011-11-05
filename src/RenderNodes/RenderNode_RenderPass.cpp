@@ -1,4 +1,4 @@
-#include "Graphics/RenderNodes/RenderNode_RenderPass.h"
+#include "RenderNodes/RenderNode_RenderPass.h"
 #include <iostream>
 
 Bamboo::RN_RenderPass::RN_RenderPass(TRenderPass pass)

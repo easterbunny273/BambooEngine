@@ -2,8 +2,8 @@
 #include <iostream>
 #include <sstream>
 #include <assert.h>
-#include "Graphics/common_gl.h"
-#include "Graphics/TextureManager.h"
+#include "common_gl.h"
+#include "TextureManager.h"
 #include "Logger.h"
 
 using namespace std;

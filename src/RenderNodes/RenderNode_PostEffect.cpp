@@ -6,10 +6,10 @@
 
 #include <string>
 
-#include "Graphics/TextureManager.h"
+#include "TextureManager.h"
 #include "Logger.h"
-#include "Graphics/ShaderManager.h"
-#include "Graphics/RenderNodes/RenderNode_PostEffect.h"
+#include "ShaderManager.h"
+#include "RenderNodes/RenderNode_PostEffect.h"
 
 Bamboo::RN_PostEffect::RN_PostEffect(std::string sShaderToUse)
     : m_sShaderName(sShaderToUse)

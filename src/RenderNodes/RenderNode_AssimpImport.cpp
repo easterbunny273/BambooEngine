@@ -1,12 +1,12 @@
 //general includes
 #include "Logger.h"
-#include "Graphics/ShaderManager.h"
-#include "Graphics/TextureManager.h"
+#include "ShaderManager.h"
+#include "TextureManager.h"
 
 //class specific
-#include "Graphics/RenderNodes/RenderNode_AssimpImport.h"
-#include "Graphics/RenderNodes/RenderNode_RenderPass.h"
-#include "Graphics/RenderNodes/RenderNode_BoundingBox.h"
+#include "RenderNodes/RenderNode_AssimpImport.h"
+#include "RenderNodes/RenderNode_RenderPass.h"
+#include "RenderNodes/RenderNode_BoundingBox.h"
 //#include "Settings.h"
 #include <assimp/assimp.hpp>
 #include <assimp/aiPostProcess.h>
@@ -646,8 +646,8 @@ void Bamboo::RN_AssimpImport::ItlLoadGeneralRessources()
     if (s_bGeneralRessourcesInitialized == false && (ItlGetGraphicCore() != NULL))
     {
 	// load shaders
-        ItlGetGraphicCore()->GetShaderManager()->AddShader("sceneobject-assimpimport", new Shader("shaders/sceneobject-assimpimport.vs", "shaders/sceneobject-assimpimport.fs"));
-        ItlGetGraphicCore()->GetShaderManager()->AddShader("simple_shading", new Shader("shaders/simple-shading.vs", "shaders/simple-shading.fs"));
+        ItlGetGraphicCore()->GetShaderManager()->AddShader("sceneobject-assimpimport", new Shader("BambooEngine/shaders/sceneobject-assimpimport.vs", "BambooEngine/shaders/sceneobject-assimpimport.fs"));
+        ItlGetGraphicCore()->GetShaderManager()->AddShader("simple_shading", new Shader("BambooEngine/shaders/simple-shading.vs", "BambooEngine/shaders/simple-shading.fs"));
 
 	s_bGeneralRessourcesInitialized = true;
     }

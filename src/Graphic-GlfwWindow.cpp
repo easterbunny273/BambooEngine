@@ -1,3 +1,6 @@
+#include "Graphic.h"
+#include "Graphic-GlfwWindow.h"
+
 #ifdef GLFW
 
 #include <string>
@@ -10,9 +13,7 @@
 #include <glm/gtx/transform2.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "Graphics/Graphic-GlfwWindow.h"
-#include "Graphics/Graphic.h"
-#include "Graphics/common_gl.h"
+#include "common_gl.h"
 #include "Logger.h"
 
 Bamboo::GlfwWindow *Bamboo::GlfwWindow::s_pInstance = NULL;

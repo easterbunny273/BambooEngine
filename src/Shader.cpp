@@ -10,8 +10,8 @@
 #include <algorithm>
 #include <assert.h>
 
-#include "Graphics/common_gl.h"
-#include "Graphics/Shader.h"
+#include "common_gl.h"
+#include "Shader.h"
 #include "Logger.h"
 
 

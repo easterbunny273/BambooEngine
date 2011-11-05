@@ -13,11 +13,11 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/glm.hpp>
 
-#include "Graphics/TextureManager.h"
+#include "TextureManager.h"
 #include "Logger.h"
-#include "Graphics/ShaderManager.h"
-#include "Graphics/RenderNodes/RenderNode_Cube.h"
-#include "Graphics/RenderNodes/RenderNode_RenderPass.h"
+#include "ShaderManager.h"
+#include "RenderNodes/RenderNode_Cube.h"
+#include "RenderNodes/RenderNode_RenderPass.h"
 
 using namespace std;
 
@@ -250,6 +250,6 @@ void Bamboo::RN_Cube::ItlRender()
 
 void Bamboo::RN_Cube::ItlLoadRessources()
 {
-    ItlGetGraphicCore()->GetShaderManager()->AddShader("basic_shading", new Shader("shaders/basic_shading.vs", "shaders/basic_shading.fs"));
+    ItlGetGraphicCore()->GetShaderManager()->AddShader("basic_shading", new Shader("BambooEngine/shaders/basic_shading.vs", "BambooEngine/shaders/basic_shading.fs"));
     TextureManager::instance()->LoadTexture("cube_texture", "textures/cube_texture.jpg", false);
 }

@@ -1,5 +1,5 @@
-#include "Graphics/SceneObjects/Cube.h"
-#include "Graphics/RenderNodes/RenderNode_Cube.h"
+#include "SceneObjects/Cube.h"
+#include "RenderNodes/RenderNode_Cube.h"
 
 #include <memory>
 

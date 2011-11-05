@@ -1,7 +1,7 @@
 #ifndef __HEADER_ISCENEOBJECT_BAMBOO
 #define __HEADER_ISCENEOBJECT_BAMBOO
 
-#include "Graphics/Graphic.h"
+#include "Graphic.h"
 
 class Bamboo::ISceneObject
 {

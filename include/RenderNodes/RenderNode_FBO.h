@@ -8,7 +8,7 @@
 #ifndef __realtime_sceneobject_fbo_header
 #define __realtime_sceneobject_fbo_header
 
-#include "Graphics/RenderNodes/IRenderNode.h"
+#include "RenderNodes/IRenderNode.h"
 
 //!  A SceneObject which renders all children in a fbo.
 /*!

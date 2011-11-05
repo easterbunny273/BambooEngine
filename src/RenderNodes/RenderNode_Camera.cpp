@@ -1,13 +1,13 @@
 
 #include "Logger.h"
-#include "Graphics/ShaderManager.h"
-#include "Graphics/RenderNodes/RenderNode_RenderPass.h"
-#include "Graphics/RenderNodes/RenderNode_Camera.h"
-
+#include "ShaderManager.h"
+#include "RenderNodes/RenderNode_RenderPass.h"
+#include "RenderNodes/RenderNode_Camera.h"
+#include "Camera.h"
 
 extern bool bUseCamera1;
 
-Bamboo::RN_Camera::RN_Camera(Bamboo::Camera * pCamera, bool bSetMatrices)
+Bamboo::RN_Camera::RN_Camera(Bamboo::ICamera * pCamera, bool bSetMatrices)
     : m_pCamera(pCamera), m_bSetMatrices(bSetMatrices)
 {
     GLdouble *vertexArray;

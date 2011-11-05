@@ -12,8 +12,8 @@
 #include <glm/glm.hpp>
 #include <vector>
 
-#include "Graphics/common_gl.h"
-#include "Graphics/RenderNodes/IRenderNode.h"
+#include "common_gl.h"
+#include "RenderNodes/IRenderNode.h"
 
 /**
   * A SceneObject is a object to be placed in a tree-based Scene-Structure

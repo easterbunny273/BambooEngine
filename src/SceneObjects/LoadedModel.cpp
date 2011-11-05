@@ -1,5 +1,5 @@
-#include "Graphics/SceneObjects/LoadedModel.h"
-#include "Graphics/RenderNodes/RenderNode_AssimpImport.h"
+#include "SceneObjects/LoadedModel.h"
+#include "RenderNodes/RenderNode_AssimpImport.h"
 
 #include <memory>
 

@@ -1,8 +1,8 @@
 #include <stack>
 #include <string.h>
 
-#include "Graphics/RenderNodes/RenderNode_FBO.h"
-#include "Graphics/TextureManager.h"
+#include "RenderNodes/RenderNode_FBO.h"
+#include "TextureManager.h"
 #include "Logger.h"
 
 std::stack<GLuint> bound_fbos;

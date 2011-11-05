@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 
-#include "Graphics/RenderNodes/IRenderNode.h"
+#include "RenderNodes/IRenderNode.h"
 
 //!  A SceneObject which renders a model which is loaded from file with Assimp.
 /*!

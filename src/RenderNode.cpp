@@ -5,10 +5,11 @@
 #include <glm/gtx/transform2.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "Graphics/Graphic.h"
-#include "Graphics/ShaderManager.h"
-#include "Graphics/RenderNodes/IRenderNode.h"
-#include "Graphics/RenderNodes/RenderNode_BoundingBox.h"
+#include "Graphic.h"
+#include "Camera.h"
+#include "ShaderManager.h"
+#include "RenderNodes/IRenderNode.h"
+#include "RenderNodes/RenderNode_BoundingBox.h"
 
 void Bamboo::IRenderNode::ItlSendTransformMatrices()
 {
@@ -83,7 +84,7 @@ void Bamboo::IRenderNode::ItlSendLightPosition()
 }
 
 
-void Bamboo::IRenderNode::SetLightSourceForShadowMapping(std::shared_ptr<Bamboo::Camera> spShadowCaster, bool bRecursivelySetForChildren)
+void Bamboo::IRenderNode::SetLightSourceForShadowMapping(std::shared_ptr<Bamboo::ICamera> spShadowCaster, bool bRecursivelySetForChildren)
 {
     m_spShadowCaster = spShadowCaster;
 

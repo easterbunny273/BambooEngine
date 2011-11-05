@@ -13,11 +13,11 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/glm.hpp>
 
-#include "Graphics/TextureManager.h"
+#include "TextureManager.h"
 #include "Logger.h"
-#include "Graphics/ShaderManager.h"
-#include "Graphics/RenderNodes/RenderNode_BoundingBox.h"
-#include "Graphics/RenderNodes/RenderNode_RenderPass.h"
+#include "ShaderManager.h"
+#include "RenderNodes/RenderNode_BoundingBox.h"
+#include "RenderNodes/RenderNode_RenderPass.h"
 
 using namespace std;
 

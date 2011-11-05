@@ -8,14 +8,14 @@
 #define __BambooEngine_Header_SceneObject_Camera
 
 #include <memory>
-#include "Graphics/RenderNodes/IRenderNode.h"
-#include "Graphics/Graphic.h"
+#include "RenderNodes/IRenderNode.h"
+#include "Graphic.h"
 
 
 class Bamboo::RN_Camera : public Bamboo::IRenderNode
 {
 public:
-    RN_Camera(Bamboo::Camera *pCamera, bool bSetMatrices=true);
+    RN_Camera(Bamboo::ICamera *pCamera, bool bSetMatrices=true);
 
     /*! \name Operations */
     //@{
@@ -35,7 +35,7 @@ protected:
     //@}
 
 private:
-    Bamboo::Camera * m_pCamera;
+    Bamboo::ICamera * m_pCamera;
     bool m_bSetMatrices;
 
     GLuint m_nVertexArrayObject;	///< The opengl name (=unsigned int) of the vertex array object
