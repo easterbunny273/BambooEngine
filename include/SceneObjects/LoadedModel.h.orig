@@ -8,6 +8,11 @@
 #include "Graphic.h"
 #include "SceneObjects/ISceneObject.h"
 
+<<<<<<< HEAD
+#include <string>
+=======
+>>>>>>> master
+
 class Bamboo::SO_LoadedModel : public Bamboo::ISceneObject
 {
 private:
