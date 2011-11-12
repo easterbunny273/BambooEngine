@@ -36,9 +36,9 @@ std::shared_ptr<GeometryData::GenericObject> AssimpWrapper::LoadModel(std::strin
     else
         Logger::debug() << "Loaded file " << sFilename << " with assimp" << Logger::endl;
 
-    bool bModelHasMeshes = scene->HasMeshes();
-    bool bModelHasMaterials = scene->HasMaterials();
-    bool bModelHasTextures = scene->HasTextures();
+    //bool bModelHasMeshes = scene->HasMeshes();
+    //bool bModelHasMaterials = scene->HasMaterials();
+    //bool bModelHasTextures = scene->HasTextures();
 
     unsigned int nNumMeshes = scene->mNumMeshes;
 
@@ -62,20 +62,24 @@ std::shared_ptr<GeometryData::GenericObject> AssimpWrapper::LoadModel(std::strin
         aiColor3D acDiffuse (0.f,0.f,0.f);
         bool bGotColorDiffuse = (AI_SUCCESS == pUsedMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, acDiffuse));
         float pfDiffuseColor[3] = { acDiffuse.r, acDiffuse.g, acDiffuse.b };
-        pGenericMesh->SetAttribute(GeometryData::GenericData::DATA_MATERIAL_COLOR_DIFFUSE, 3, pfDiffuseColor);
+        if (bGotColorDiffuse)
+            pGenericMesh->AddAttributeValues(GeometryData::GenericData::DATA_MATERIAL_COLOR_DIFFUSE, 3, pfDiffuseColor);
 
         aiColor3D acSpecular (0.f, 0.f, 0.f);
         bool bGotSpecularColor = (AI_SUCCESS == pUsedMaterial->Get(AI_MATKEY_COLOR_SPECULAR, acSpecular));
         float pfSpecularColor[3] = { acSpecular.r, acSpecular.g, acSpecular.b };
-        pGenericMesh->SetAttribute(GeometryData::GenericData::DATA_MATERIAL_COLOR_SPECULAR, 3, pfSpecularColor);
+        if (bGotSpecularColor)
+            pGenericMesh->AddAttributeValues(GeometryData::GenericData::DATA_MATERIAL_COLOR_SPECULAR, 3, pfSpecularColor);
 
         float fShininess = 0.0f;
         bool bGotShininess = (AI_SUCCESS == pUsedMaterial->Get(AI_MATKEY_SHININESS, fShininess));
-        pGenericMesh->SetAttribute(GeometryData::GenericData::DATA_MATERIAL_SHININESS, 1, &fShininess);
+        if (bGotShininess)
+            pGenericMesh->AddAttributeValues(GeometryData::GenericData::DATA_MATERIAL_SHININESS, 1, &fShininess);
 
         float fShininessStrength = 0.0f;
         bool bGotShininessStrength = (AI_SUCCESS == pUsedMaterial->Get(AI_MATKEY_SHININESS_STRENGTH, fShininessStrength));
-        pGenericMesh->SetAttribute(GeometryData::GenericData::DATA_MATERIAL_SHININESS_STRENGTH, 1, &fShininessStrength);
+        if (bGotShininessStrength)
+            pGenericMesh->AddAttributeValues(GeometryData::GenericData::DATA_MATERIAL_SHININESS_STRENGTH, 1, &fShininessStrength);
 
         assert (pMesh->HasPositions());
 
@@ -94,7 +98,7 @@ std::shared_ptr<GeometryData::GenericObject> AssimpWrapper::LoadModel(std::strin
                 vfVertices.push_back(pMesh->mVertices[ii].z);
             }
 
-            pGenericMesh->SetAttribute(GeometryData::GenericData::DATA_VERTICES,
+            pGenericMesh->AddAttributeValues(GeometryData::GenericData::DATA_VERTICES,
                                        3 * nNumVertices,
                                        &vfVertices[0]);
         }
@@ -114,7 +118,7 @@ std::shared_ptr<GeometryData::GenericObject> AssimpWrapper::LoadModel(std::strin
                 vfNormals.push_back(pMesh->mNormals[ii].z);
             }
 
-            pGenericMesh->SetAttribute(GeometryData::GenericData::DATA_NORMALS,
+            pGenericMesh->AddAttributeValues(GeometryData::GenericData::DATA_NORMALS,
                                        3 * nNumVertices,
                                        &vfNormals[0]);
         }
@@ -137,13 +141,36 @@ std::shared_ptr<GeometryData::GenericObject> AssimpWrapper::LoadModel(std::strin
                 vfBitangents.push_back(pMesh->mBitangents[ii].z);
             }
 
-            pGenericMesh->SetAttribute(GeometryData::GenericData::DATA_TANGENTS,
+            pGenericMesh->AddAttributeValues(GeometryData::GenericData::DATA_TANGENTS,
                                        3 * nNumVertices,
                                        &vfTangents[0]);
 
-            pGenericMesh->SetAttribute(GeometryData::GenericData::DATA_BITANGENTS,
+            pGenericMesh->AddAttributeValues(GeometryData::GenericData::DATA_BITANGENTS,
                                        3 * nNumVertices,
                                        &vfTangents[0]);
+        }
+
+
+        if (pMesh->GetNumColorChannels() > 1)
+            Logger::error() << "The model " << sFilename << " has more than one color channel. Only 1 color channel is imported by AssimpWrapper" << Logger::endl;
+
+        if (pMesh->HasVertexColors(0))
+        {
+            unsigned int nNumVertices = pMesh->mNumVertices;
+
+            std::vector<float> vfColors;
+
+            //get vertices
+            for (unsigned int ii=0; ii < nNumVertices; ii++)
+            {
+                vfColors.push_back(pMesh->mColors[0][ii].r);
+                vfColors.push_back(pMesh->mColors[0][ii].g);
+                vfColors.push_back(pMesh->mColors[0][ii].b);
+            }
+
+            pGenericMesh->AddAttributeValues(GeometryData::GenericData::DATA_COLORS,
+                                       3 * nNumVertices,
+                                       &vfColors[0]);
         }
 
         // get indices
@@ -151,7 +178,7 @@ std::shared_ptr<GeometryData::GenericObject> AssimpWrapper::LoadModel(std::strin
         unsigned int nNumFaces = pMesh->mNumFaces;
         std::vector<unsigned int> vIndicesVector;
 
-        for (int ii=0; ii < nNumFaces; ii++)
+        for (unsigned int ii=0; ii < nNumFaces; ii++)
         {
             assert (pMesh->mFaces[ii].mNumIndices == 3);
 
@@ -160,7 +187,31 @@ std::shared_ptr<GeometryData::GenericObject> AssimpWrapper::LoadModel(std::strin
             vIndicesVector.push_back(pMesh->mFaces[ii].mIndices[2]);
         }
 
-        pGenericMesh->SetIndices(nNumFaces * 3, &vIndicesVector[0]);
+        pGenericMesh->AddIndices(nNumFaces * 3, &vIndicesVector[0]);
+
+        // get textures
+
+        bool bTextureFound = false;
+
+        for (int iTextureType= (int) aiTextureType_DIFFUSE; iTextureType <= (int) aiTextureType_UNKNOWN; iTextureType++)
+        {
+            int iCount = pUsedMaterial->GetTextureCount((aiTextureType) iTextureType);
+
+            assert (iCount <= 1);
+
+            if (iCount == 1)
+            {
+                assert (bTextureFound == false);
+
+                aiString sTexturePath;
+
+                pUsedMaterial->GetTexture((aiTextureType) iTextureType, 0, &sTexturePath);
+
+                pGenericMesh->SetTexturePath(std::string(sTexturePath.data));
+
+                bTextureFound = true;
+            }
+        }
     }
 
 

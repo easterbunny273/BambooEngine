@@ -24,12 +24,18 @@ public:
         static const char * DATA_NORMALS;
         static const char * DATA_TANGENTS;
         static const char * DATA_BITANGENTS;
-        static const char * DATA_TEXCOORDS0;
+        static const char * DATA_TEXCOORDS[8];
 
         static const char * DATA_MATERIAL_COLOR_DIFFUSE;
         static const char * DATA_MATERIAL_COLOR_SPECULAR;
         static const char * DATA_MATERIAL_SHININESS;
         static const char * DATA_MATERIAL_SHININESS_STRENGTH;
+    };
+
+    class TextureNames
+    {
+    public:
+        static const char * DIFFUSE_COLOR;
     };
 
     class GenericMesh
@@ -41,17 +47,25 @@ public:
 
         float *GetAttribute(const char *szName, unsigned int &rnNumEntries);
 
-        void    SetAttribute(const char *szName, unsigned int nNumEntries, float * pArray);
-        void    SetIndices(unsigned int nNumEntries, unsigned int * pArray);
+        std::vector<std::pair<std::string, std::vector<float> > > GetAttributeList();
 
+        void    AddAttributeValues(const char *szName, unsigned int nNumEntries, float * pArray);
+        void    AddIndices(unsigned int nNumEntries, unsigned int * pArray);
+        void    SetTexturePath(std::string sTexturePath);
+
+        unsigned int NumAttributes() const;
         void Debug();
 
     private:
-        std::map<std::string, float *>      m_mAttributeMap;
-        std::map<std::string, unsigned int> m_mAttributeSizes;
+        std::map<std::string, std::vector<float> >      m_mAttributeMap;
 
-        unsigned int *m_pnIndices;
-        unsigned int m_nNumIndices;
+        std::string         m_sTexturePath;
+
+        std::map<std::string, std::vector<float> >  m_mTextureCoords;
+        std::map<std::string, unsigned int>         m_mTextures;
+
+
+        std::vector<unsigned int>   m_vIndices;
     };
 
     class GenericObject
@@ -65,7 +79,6 @@ public:
     private:
         std::vector<std::shared_ptr<GenericMesh> >    m_vspMeshes;
     };
-
 };
 
 #endif
