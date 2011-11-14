@@ -59,11 +59,29 @@ std::shared_ptr<GeometryData::GenericObject> AssimpWrapper::LoadModel(std::strin
         aiMaterial *pUsedMaterial = scene->mMaterials[nMaterialIndex];
 
         // now fetch the material properties
-      /*  aiColor3D acDiffuse (0.f,0.f,0.f);
+       /* aiColor3D acDiffuse (0.f,0.f,0.f);
         bool bGotColorDiffuse = (AI_SUCCESS == pUsedMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, acDiffuse));
         float pfDiffuseColor[3] = { acDiffuse.r, acDiffuse.g, acDiffuse.b };
         if (bGotColorDiffuse)
-            pGenericMesh->AddAttributeValues(GeometryData::GenericData::DATA_MATERIAL_COLOR_DIFFUSE, 3, pfDiffuseColor);
+        {
+           // pGenericMesh->AddAttributeValues(GeometryData::GenericData::DATA_MATERIAL_COLOR_DIFFUSE, 3, pfDiffuseColor);
+
+            unsigned int nNumVertices = pMesh->mNumVertices;
+
+            std::vector<float> vfFakedColor;
+
+            //get vertices
+            for (unsigned int ii=0; ii < nNumVertices; ii++)
+            {
+                vfFakedColor.push_back(pfDiffuseColor[0]);
+                vfFakedColor.push_back(pfDiffuseColor[1]);
+                vfFakedColor.push_back(pfDiffuseColor[2]);
+            }
+
+            pGenericMesh->AddAttributeValues(GeometryData::GenericData::DATA_COLORS,
+                                       3 * nNumVertices,
+                                       &vfFakedColor[0]);
+        }
 
         aiColor3D acSpecular (0.f, 0.f, 0.f);
         bool bGotSpecularColor = (AI_SUCCESS == pUsedMaterial->Get(AI_MATKEY_COLOR_SPECULAR, acSpecular));
@@ -169,8 +187,8 @@ std::shared_ptr<GeometryData::GenericObject> AssimpWrapper::LoadModel(std::strin
             }
 
             pGenericMesh->AddAttributeValues(GeometryData::GenericData::DATA_COLORS,
-                                       3 * nNumVertices,
-                                       &vfColors[0]);
+                                               3 * nNumVertices,
+                                               &vfColors[0]);
         }
 
         // get indices
