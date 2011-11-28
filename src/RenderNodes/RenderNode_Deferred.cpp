@@ -3,6 +3,8 @@
 #include "TextureManager.h"
 #include "Logger.h"
 
+extern int s_DebugDeferredTexture;
+
 Bamboo::RN_Deferred::RN_Deferred(unsigned int nWidth, unsigned int nHeight)
     : m_nWidth(nWidth), m_nHeight(nHeight)
 {
@@ -23,15 +25,16 @@ void Bamboo::RN_Deferred::ItlCreateFBO()
     assert (pTextureManager != NULL);
 
     //get the id of a free texture unit from the texture manager
-    GLuint nUsedTextureUnit = pTextureManager->GetFreeUnit(); //ask for a free texture unit
+    GLuint nUsedTextureUnit = pTextureManager->RequestFreeUnit(); //ask for a free texture unit
 
     //activate unit
     glActiveTexture(GL_TEXTURE0 + nUsedTextureUnit);
 
-    m_nAlbedoDrawBuffer = ItlSetupColorTexture();
-    m_nNormalDrawBuffer = ItlSetupColorTexture();
-    m_nSpecularDrawBuffer = ItlSetupColorTexture();
-    m_nDepthDrawBuffer = ItlSetupDepthTexture();
+    m_nAlbedoDrawBuffer = ItlCreateColorTexture();
+    m_nNormalDrawBuffer = ItlCreateColorTexture();
+    m_nTangentDrawBuffer = ItlCreateColorTexture();
+    m_nSpecularDrawBuffer = ItlCreateColorTexture();
+    m_nDepthDrawBuffer = ItlCreateDepthTexture();
 
 
     glGenFramebuffers(1, &m_nFBO);
@@ -40,19 +43,14 @@ void Bamboo::RN_Deferred::ItlCreateFBO()
     // attach the texture to FBO color attachment point
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_nAlbedoDrawBuffer, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_nNormalDrawBuffer, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_nSpecularDrawBuffer, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_nTangentDrawBuffer, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, m_nSpecularDrawBuffer, 0);
 
     // attach the renderbuffer to depth attachment point
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_nDepthDrawBuffer, 0);
 
-    GLenum DrawBuffers[3] =
-            {
-                    GL_COLOR_ATTACHMENT0,
-                    GL_COLOR_ATTACHMENT1,
-                    GL_COLOR_ATTACHMENT2,
-            };
-
-    glDrawBuffers(3, DrawBuffers);
+    GLenum tDrawBuffers[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 , GL_COLOR_ATTACHMENT3 };
+    glDrawBuffers(4, tDrawBuffers);
 
     //check fbo status
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -68,7 +66,7 @@ void Bamboo::RN_Deferred::ItlCreateFBO()
 }
 
 
-GLuint Bamboo::RN_Deferred::ItlSetupColorTexture()
+GLuint Bamboo::RN_Deferred::ItlCreateColorTexture()
 {
     GLuint nNewTexture;
 
@@ -95,7 +93,7 @@ GLuint Bamboo::RN_Deferred::ItlSetupColorTexture()
     return nNewTexture;
 }
 
-GLuint Bamboo::RN_Deferred::ItlSetupDepthTexture()
+GLuint Bamboo::RN_Deferred::ItlCreateDepthTexture()
 {
     GLuint nNewTexture;
 
@@ -133,6 +131,7 @@ void Bamboo::RN_Deferred::ItlDeleteTextures()
 {
     glDeleteTextures(1, &m_nAlbedoDrawBuffer);
     glDeleteTextures(1, &m_nNormalDrawBuffer);
+    glDeleteTextures(1, &m_nTangentDrawBuffer);
     glDeleteTextures(1, &m_nSpecularDrawBuffer);
     glDeleteTextures(1, &m_nDepthDrawBuffer);
 }
@@ -143,6 +142,8 @@ void Bamboo::RN_Deferred::ItlPreRenderChildren()
     glGetIntegerv(GL_VIEWPORT, m_iGeneralViewportParams);
 
     glBindFramebuffer(GL_FRAMEBUFFER, m_nFBO);
+
+    ItlPushFBO(m_nFBO);
 
     //set viewport size
     glViewport(0,0, m_nWidth, m_nHeight);
@@ -156,7 +157,17 @@ void Bamboo::RN_Deferred::ItlPreRenderChildren()
 
 void Bamboo::RN_Deferred::ItlPostRenderChildren()
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    //remove the fbo (THIS fbo) from the bound_fbos stack
+    ItlPopFBO();
+
+    //if there was a SceneObject_FBO bound in the SceneObject_Tree, rebind the previous bound fbo
+    if (ItlIsNestedFBO())
+    {
+        GLuint previous_bound = ItlGetTopFBO();
+        glBindFramebuffer(GL_FRAMEBUFFER, previous_bound);
+    }
+    else
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     //restore viewport params
     glViewport(m_iGeneralViewportParams[0], m_iGeneralViewportParams[1], m_iGeneralViewportParams[2], m_iGeneralViewportParams[3]);
@@ -168,11 +179,34 @@ void Bamboo::RN_Deferred::ItlPreRender()
 
 void Bamboo::RN_Deferred::ItlRender()
 {
-   /* static Bamboo::RN_PostEffect rPostEffectNode("directwrite");
+    // just for debugging!
 
-    rPostEffectNode.SetTexture("texture1", m_nDepthDrawBuffer);
+    static Bamboo::RN_PostEffect rPostEffectNode("directwrite");
 
-    rPostEffectNode.Render();*/
+    GLuint nTextureToShow;
+
+    switch (s_DebugDeferredTexture % 5)
+    {
+    case 0:
+        nTextureToShow = m_nAlbedoDrawBuffer;
+        break;
+    case 1:
+        nTextureToShow = m_nNormalDrawBuffer;
+        break;
+    case 2:
+        nTextureToShow = m_nTangentDrawBuffer;
+        break;
+    case 3:
+        nTextureToShow = m_nSpecularDrawBuffer;
+        break;
+    case 4:
+        nTextureToShow = m_nDepthDrawBuffer;
+        break;
+    }
+
+    rPostEffectNode.SetTexture("texture1", nTextureToShow );
+
+    rPostEffectNode.Render();
 
 
 }

@@ -16,22 +16,27 @@ std::shared_ptr<GeometryData::GenericObject> AssimpWrapper::LoadModel(std::strin
 {
     Assimp::Importer importer;
 
+    importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_POINT | aiPrimitiveType_LINE );
+
     const aiScene* scene = importer.ReadFile(sFilename,
                                              aiProcess_CalcTangentSpace	|
-                                             //aiProcess_ValidateDataStructure	|
+                                             aiProcess_ValidateDataStructure	|
                                              aiProcess_Triangulate		|
                                              aiProcess_PreTransformVertices	|
                                              //aiProcess_JoinIdenticalVertices	|
-                                             aiProcess_GenNormals		|
+                                             aiProcess_GenSmoothNormals		|
                                              aiProcess_ImproveCacheLocality |
-                                             //aiProcess_FindInvalidData |
-                                             aiProcess_OptimizeMeshes |
+                                             aiProcess_FindInvalidData |
+                                             //aiProcess_OptimizeMeshes |
                                              //aiProcess_OptimizeGraph  |
+                                             aiProcess_FlipUVs |
                                              aiProcess_FindDegenerates |
-                                             aiProcess_SortByPType);
+                                             aiProcess_SortByPType
+
+                                             );
 
       // If the import failed, report it
-      if( !scene)
+    if( !scene)
         Logger::error() << importer.GetErrorString() << Logger::endl;
     else
         Logger::debug() << "Loaded file " << sFilename << " with assimp" << Logger::endl;
@@ -208,7 +213,6 @@ std::shared_ptr<GeometryData::GenericObject> AssimpWrapper::LoadModel(std::strin
         pGenericMesh->AddIndices(nNumFaces * 3, &vIndicesVector[0]);
 
         // get textures
-
         for (int iTextureType= (int) aiTextureType_DIFFUSE; iTextureType <= (int) aiTextureType_UNKNOWN; iTextureType++)
         {
             int iCount = pUsedMaterial->GetTextureCount((aiTextureType) iTextureType);
@@ -237,6 +241,9 @@ std::shared_ptr<GeometryData::GenericObject> AssimpWrapper::LoadModel(std::strin
                     break;
                 case aiTextureType_SPECULAR:
                     tTextureType = GeometryData::TextureNames::SPECULAR;
+                    break;
+                case aiTextureType_HEIGHT:
+                    tTextureType = GeometryData::TextureNames::NORMAL;
                     break;
                 case aiTextureType_DISPLACEMENT:
                     tTextureType = GeometryData::TextureNames::DISPLACE;

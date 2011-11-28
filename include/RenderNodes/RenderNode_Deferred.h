@@ -55,10 +55,10 @@ private:
     void ItlDeleteFBO();
 
     /// creates an opengl color texture with the parameters needed for this node
-    GLuint ItlSetupColorTexture();
+    GLuint ItlCreateColorTexture();
 
     /// creates an opengl depth texture with the parameters needed for this node
-    GLuint ItlSetupDepthTexture();
+    GLuint ItlCreateDepthTexture();
 
     void    ItlDeleteTextures();
     //@}
@@ -70,6 +70,7 @@ private:
 
         GLuint      m_nAlbedoDrawBuffer;
         GLuint      m_nNormalDrawBuffer;
+        GLuint      m_nTangentDrawBuffer;
         GLuint      m_nSpecularDrawBuffer;
         GLuint      m_nDepthDrawBuffer;
 
