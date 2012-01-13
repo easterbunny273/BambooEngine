@@ -63,6 +63,9 @@ private:
     /// creates a vbo to draw the spotlight as wireframe
     void ItlCreateVBO();
 
+    /// prepares the vertex array object
+    void ItlPrepareVAO();
+
     void ItlChangeMatrices();
     void ItlRestoreMatrices();
     //@}
@@ -77,6 +80,11 @@ private:
     glm::mat4       m_m4SavedViewProjectionMatrix;
 
     glm::vec3       m_vLightColor;
+    glm::vec3       m_vLightPosition;
+
+
+    glm::mat4       m_m4LastUsedViewProjectionMatrix;
+    glm::vec3       m_v3LastUsedLightPosition;
 
     GLuint m_nColorTexture;
     GLuint m_nDepthTexture;
@@ -94,3 +102,4 @@ private:
 };
 
 #endif
+

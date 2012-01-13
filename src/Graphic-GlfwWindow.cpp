@@ -15,12 +15,13 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "common_gl.h"
-#include "Logger.h"
+#include "PC_Logger.h"
 
 Bamboo::GlfwWindow *Bamboo::GlfwWindow::s_pInstance = NULL;
 
 
 int s_DebugDeferredTexture = 0;
+int s_nUseParallax = 0;
 
 /****************************************************************
   *************************************************************** */
@@ -33,10 +34,18 @@ Bamboo::GlfwWindow::GlfwWindow()
   *************************************************************** */
 std::shared_ptr<Bamboo::GlfwWindow> Bamboo::GlfwWindow::Create(int iWidth, int iHeight, std::string sWindowTitle)
 {
-    // todo: try only versions which are acceptable for the used rendernodes, else something strange will happen :-)
-    std::vector<int> viMajorVersions = { 4, 4, 3, 3, 3, 2, 2, 1 };
-    std::vector<int> viMinorVersions = { 2, 1, 3, 2, 0, 1, 0, 5 };
-    std::vector<int> viCoreProfileFlag = { GLFW_OPENGL_CORE_PROFILE, GLFW_OPENGL_COMPAT_PROFILE, 0 };
+  std::vector<std::pair<int, int> > viOpenGLVersions;
+
+  viOpenGLVersions.push_back(std::pair<int, int> (4, 2));
+  viOpenGLVersions.push_back(std::pair<int, int> (4, 1));
+  viOpenGLVersions.push_back(std::pair<int, int> (3, 3));
+  viOpenGLVersions.push_back(std::pair<int, int> (3, 2));
+
+
+  std::vector<int> viCoreProfileFlag;
+  viCoreProfileFlag.push_back(GLFW_OPENGL_CORE_PROFILE);
+  viCoreProfileFlag.push_back(GLFW_OPENGL_COMPAT_PROFILE);
+  viCoreProfileFlag.push_back(0);
 
     std::shared_ptr<GlfwWindow> spNewWindow(new GlfwWindow());
     spNewWindow->m_iWidth = iWidth;
@@ -65,10 +74,10 @@ std::shared_ptr<Bamboo::GlfwWindow> Bamboo::GlfwWindow::Create(int iWidth, int i
     bool bWindowCreated = false;
 
     for (unsigned int iProfile = 0; iProfile < viCoreProfileFlag.size(); iProfile++)
-    for (unsigned int i=0; !bWindowCreated && i < viMajorVersions.size(); i++)
+    for (unsigned int i=0; !bWindowCreated && i < viOpenGLVersions.size(); i++)
     {
-        glfwOpenWindowHint(GLFW_OPENGL_VERSION_MAJOR, viMajorVersions[i]);
-        glfwOpenWindowHint(GLFW_OPENGL_VERSION_MINOR, viMinorVersions[i]);
+        glfwOpenWindowHint(GLFW_OPENGL_VERSION_MAJOR, viOpenGLVersions[i].first);
+        glfwOpenWindowHint(GLFW_OPENGL_VERSION_MINOR, viOpenGLVersions[i].second);
 
         glfwOpenWindowHint(GLFW_OPENGL_PROFILE, viCoreProfileFlag[iProfile]);
 
@@ -83,7 +92,7 @@ std::shared_ptr<Bamboo::GlfwWindow> Bamboo::GlfwWindow::Create(int iWidth, int i
 
 
         Logger::debug() << "Try opening context " <<
-                           viMajorVersions[i] << "." << viMinorVersions[i]
+                           viOpenGLVersions[i].first << "." << viOpenGLVersions[i].second
                         << " with " << sProfileName << " profile" << Logger::endl;
 
         bWindowCreated = (glfwOpenWindow(iWidth, iHeight, 8,8,8,8, 24, 8, GLFW_WINDOW) == GL_TRUE);
@@ -149,6 +158,14 @@ void Bamboo::GlfwWindow::ItlStaticHandleKeyboardEvent(int iKeyIdentifier, int iN
         s_DebugDeferredTexture++;
         return;
     }
+
+    if (iKeyIdentifier == GLFW_KEY_TAB && iNewKeyState==GLFW_PRESS)
+    {
+        s_nUseParallax++;
+
+        return;
+    }
+
 
 
     // this method is a static method (glfw cannot call class methods)

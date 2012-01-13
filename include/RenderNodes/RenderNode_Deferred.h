@@ -79,13 +79,15 @@ private:
         unsigned int m_nHeight;
 
         GLuint      m_nAlbedoDrawBuffer;
+        GLuint      m_nStencilDrawBuffer;
         GLuint      m_nNormalDrawBuffer;
+        GLuint      m_nNormalMapDrawBuffer;
         GLuint      m_nTangentDrawBuffer;
         GLuint      m_nSpecularDrawBuffer;
         GLuint      m_nPositionDrawBuffer;
         GLuint      m_nDepthDrawBuffer;
 
-        GLuint      m_nCombinedDrawBuffer;
+        GLuint      m_nDisplaceDrawBuffer;
 
         GLuint      m_nFBO;
 

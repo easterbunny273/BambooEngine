@@ -1,14 +1,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "RenderNodes/RenderNode_SpotLight.h"
-#include "Logger.h"
+#include "PC_Logger.h"
 #include "ShaderManager.h"
 #include "TextureManager.h"
 #include <iostream>
 
 #define NEARPLANE 0.1f
 #define FARPLANE 50.0f
-#define SHADOWMAP_RESOLUTION 256.0f
+#define SHADOWMAP_RESOLUTION 2048.0f
 
 Bamboo::RN_SpotLight::RN_SpotLight(glm::vec3 vPosition,
                                    glm::vec3 vLookDirection,
@@ -27,6 +27,8 @@ Bamboo::RN_SpotLight::RN_SpotLight(glm::vec3 vPosition,
     ItlCreateVBO();
 
     m_vLightColor = vLightColor;
+    m_vLightPosition = vPosition;
+
 
     Logger::debug() << "RN_SpotLight created" << Logger::endl;
 }
@@ -71,14 +73,16 @@ void Bamboo::RN_SpotLight::ItlCreateVBO()
 
     indexArray = new GLuint[36];
 
+    // links
     indexArray[0] = 5;
-    indexArray[1] = 4;
-    indexArray[2] = 1;
+    indexArray[1] = 1;
+    indexArray[2] = 4;
 
-    indexArray[3] = 0;
+    indexArray[3] = 4;
     indexArray[4] = 1;
-    indexArray[5] = 4;
+    indexArray[5] = 0;
 
+    //hingen
     indexArray[6] = 5;
     indexArray[7] = 4;
     indexArray[8] = 6;
@@ -87,6 +91,7 @@ void Bamboo::RN_SpotLight::ItlCreateVBO()
     indexArray[10] = 6;
     indexArray[11] = 4;
 
+    //rechts
     indexArray[12] = 6;
     indexArray[13] = 7;
     indexArray[14] = 2;
@@ -95,14 +100,16 @@ void Bamboo::RN_SpotLight::ItlCreateVBO()
     indexArray[16] = 2;
     indexArray[17] = 7;
 
+    // vorne
     indexArray[18] = 1;
     indexArray[19] = 0;
     indexArray[20] = 2;
 
-    indexArray[21] = 7;
-    indexArray[22] = 6;
-    indexArray[23] = 0;
+    indexArray[21] = 2;
+    indexArray[22] = 0;
+    indexArray[23] = 3;
 
+    //oben
     indexArray[24] = 2;
     indexArray[25] = 1;
     indexArray[26] = 6;
@@ -111,6 +118,7 @@ void Bamboo::RN_SpotLight::ItlCreateVBO()
     indexArray[28] = 6;
     indexArray[29] = 1;
 
+    //unten
     indexArray[30] = 0;
     indexArray[31] = 3;
     indexArray[32] = 4;
@@ -147,7 +155,40 @@ void Bamboo::RN_SpotLight::ItlCreateVBO()
     GLenum error = glGetError();
 
     if (error != GL_NO_ERROR)
-        Logger::error() << "glGetError: " << TranslateGLerror(error) << Logger::endl;
+      Logger::error() << "glGetError: " << TranslateGLerror(error) << Logger::endl;
+
+    // prepare the vertex array object
+    ItlPrepareVAO();
+}
+
+void Bamboo::RN_SpotLight::ItlPrepareVAO()
+{
+  // get shaer manager
+  ShaderManager *pShaderManager = ItlGetGraphicCore()->GetShaderManager();
+
+  // set "our" shader
+  pShaderManager->PushActiveShader();
+  pShaderManager->ActivateShader("light-pass");
+
+  // get memory position of attribute
+  const GLint l_in_Position(pShaderManager->GetAttribute("in_Position"));
+  assert (l_in_Position != -1);
+
+  // bind vertex array object
+  glBindVertexArray(m_nVertexArrayObject);
+
+  // bind vertex buffer object
+  glBindBuffer(GL_ARRAY_BUFFER, m_nVertexBufferObject);
+
+  // bind data in vbo to "in_Position" and enable attribute
+  if (l_in_Position != -1)
+  {
+      glVertexAttribPointer(l_in_Position, 3, GL_DOUBLE, GL_FALSE, 3 * sizeof(GLdouble), NULL);
+      glEnableVertexAttribArray(l_in_Position);
+  }
+
+  // reset active shader
+  pShaderManager->PopActiveShader();
 }
 
 GLuint Bamboo::RN_SpotLight::ItlCreateColorTexture()
@@ -242,12 +283,14 @@ void Bamboo::RN_SpotLight::ItlCreateFBO()
 void Bamboo::RN_SpotLight::ItlPreRender()
 {
     ItlGetGraphicCore()->GetShaderManager()->PushActiveShader();
-    ItlGetGraphicCore()->GetShaderManager()->ActivateShader("camera-debug");
+    ItlGetGraphicCore()->GetShaderManager()->ActivateShader("light-pass");
 }
 
 void Bamboo::RN_SpotLight::ItlPostRender()
 {
     ItlGetGraphicCore()->GetShaderManager()->PopActiveShader();
+
+
 }
 
 void Bamboo::RN_SpotLight::ItlLoadRessources()
@@ -257,127 +300,163 @@ void Bamboo::RN_SpotLight::ItlLoadRessources()
 
 void Bamboo::RN_SpotLight::ItlRender()
 {
-    glDisable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE);
 
-    glBindVertexArray(m_nVertexArrayObject);
-    glBindBuffer(GL_ARRAY_BUFFER, m_nVertexBufferObject);
-
-    ShaderManager *pShaderManager = ItlGetGraphicCore()->GetShaderManager();
-    TextureManager *pTextureManager = ItlGetGraphicCore()->GetTextureManager();
-
-    const GLint l_in_Position(pShaderManager->GetAttribute("in_Position"));
-    const GLint l_cameraInverse_Position = pShaderManager->GetUniform("Camera_InverseMatrix");
-    const GLint l_lightmatrix_Position = pShaderManager->GetUniform("Light_ViewProjectionMatrix");
-    const GLint l_shadowmap_Position = pShaderManager->GetUniform("shadowmap");
-    const GLint l_lightcolor_Position = pShaderManager->GetUniform("vLightColor");
 
     glm::mat4 mViewProjectionMatrix = m_m4ProjectionMatrix * m_m4ViewMatrix;
     glm::mat4 mInverseViewProjectionMatrix = glm::inverse(mViewProjectionMatrix);
 
-    if (l_lightcolor_Position != -1)
-        glUniform3f(l_lightcolor_Position, m_vLightColor.r, m_vLightColor.g, m_vLightColor.b);
+    if (mViewProjectionMatrix != m_m4LastUsedViewProjectionMatrix || m_vLightPosition != m_v3LastUsedLightPosition)
+      m_bHasChildren = (!m_vChildren.empty());
 
-    if (l_cameraInverse_Position != -1)
-        glUniformMatrix4fv(l_cameraInverse_Position, 1, GL_FALSE, &mInverseViewProjectionMatrix[0][0]);
 
-    if (l_lightmatrix_Position != -1)
-        glUniformMatrix4fv(l_lightmatrix_Position, 1, GL_FALSE, &mViewProjectionMatrix[0][0]);
+      glDisable(GL_DEPTH_TEST);
+      glEnable(GL_BLEND);
+      glBlendFunc(GL_ONE, GL_ONE);
 
-    if (l_in_Position != -1)
-    {
-        glVertexAttribPointer(l_in_Position, 3, GL_DOUBLE, GL_FALSE, 3 * sizeof(GLdouble), NULL);
-        glEnableVertexAttribArray(l_in_Position);
-    }
+      glBindVertexArray(m_nVertexArrayObject);
+      glBindBuffer(GL_ARRAY_BUFFER, m_nVertexBufferObject);
 
-    GLuint iTextureUnitShadowMap = pTextureManager->UseTexture(m_nColorTexture);
+      ShaderManager *pShaderManager = ItlGetGraphicCore()->GetShaderManager();
+      TextureManager *pTextureManager = ItlGetGraphicCore()->GetTextureManager();
 
-    if (l_shadowmap_Position != -1)
-        glUniform1i(l_shadowmap_Position, iTextureUnitShadowMap);
+      const GLint l_cameraInverse_Position = pShaderManager->GetUniform("Camera_InverseMatrix");
+      const GLint l_lightmatrix_Position = pShaderManager->GetUniform("Light_ViewProjectionMatrix");
+      const GLint l_shadowmap_Position = pShaderManager->GetUniform("shadowmap");
+      const GLint l_spotmask_Position = pShaderManager->GetUniform("spotmask");
+      const GLint l_lightcolor_Position = pShaderManager->GetUniform("vLightColor");
+      const GLint l_lightposition_Position = pShaderManager->GetUniform("LightPosition");
 
-    for (auto iter=m_mTextureLocations.begin(); iter!= m_mTextureLocations.end(); iter++)
-    {
-        const std::string *pName = &(iter->first);
-        GLint iTextureID = iter->second;
 
-        GLuint iTextureUnit = pTextureManager->UseTexture(iTextureID);
 
-        GLint iUniformLocation = pShaderManager->GetUniform(*pName);
-        if (iUniformLocation != -1)
-            glUniform1i(iUniformLocation, iTextureUnit);
-    }
 
-   // glLineWidth(1.0f);
-   // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    glDisable(GL_CULL_FACE);
+      if (l_lightposition_Position != -1)
+          glUniform3f(l_lightposition_Position, m_vLightPosition.x, m_vLightPosition.y, m_vLightPosition.z);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_nIndexBufferObject);
-    glDrawElements(GL_TRIANGLES, m_iIndexArraySize, GL_UNSIGNED_INT, NULL);
+      if (l_lightcolor_Position != -1)
+          glUniform3f(l_lightcolor_Position, m_vLightColor.r, m_vLightColor.g, m_vLightColor.b);
 
-    glEnable(GL_CULL_FACE);
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+      if (l_cameraInverse_Position != -1)
+          glUniformMatrix4fv(l_cameraInverse_Position, 1, GL_FALSE, &mInverseViewProjectionMatrix[0][0]);
 
-    glBindVertexArray(0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+      if (l_lightmatrix_Position != -1)
+          glUniformMatrix4fv(l_lightmatrix_Position, 1, GL_FALSE, &mViewProjectionMatrix[0][0]);
 
-    pTextureManager->UnuseTexture(m_nColorTexture);
+      GLuint iTextureUnitShadowMap = pTextureManager->UseTexture(m_nColorTexture);
+      GLuint iTextureUnitSpotMask = pTextureManager->UseTexture("spotlight");
 
-    for (auto iter=m_mTextureLocations.begin(); iter!= m_mTextureLocations.end(); iter++)
-    {
-        GLint iTextureID = iter->second;
-        pTextureManager->UnuseTexture(iTextureID);
-    }
+      if (l_spotmask_Position != -1)
+          glUniform1i(l_spotmask_Position, iTextureUnitSpotMask);
 
-    glEnable(GL_DEPTH_TEST);
-    glDisable(GL_BLEND);
+      if (l_shadowmap_Position != -1)
+          glUniform1i(l_shadowmap_Position, iTextureUnitShadowMap);
+
+      for (auto iter=m_mTextureLocations.begin(); iter!= m_mTextureLocations.end(); iter++)
+      {
+          const std::string *pName = &(iter->first);
+          GLint iTextureID = iter->second;
+
+          GLuint iTextureUnit = pTextureManager->UseTexture(iTextureID);
+
+          GLint iUniformLocation = pShaderManager->GetUniform(*pName);
+          if (iUniformLocation != -1)
+              glUniform1i(iUniformLocation, iTextureUnit);
+      }
+
+     // glLineWidth(1.0f);
+      //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+      //glDisable(GL_CULL_FACE);
+
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_nIndexBufferObject);
+      glDrawElements(GL_TRIANGLES, m_iIndexArraySize, GL_UNSIGNED_INT, NULL);
+
+      //glEnable(GL_CULL_FACE);
+      //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+      glBindVertexArray(0);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+      glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+      pTextureManager->UnuseTexture(m_nColorTexture);
+      pTextureManager->UnuseTexture("spotlight");
+
+      for (auto iter=m_mTextureLocations.begin(); iter!= m_mTextureLocations.end(); iter++)
+      {
+          GLint iTextureID = iter->second;
+          pTextureManager->UnuseTexture(iTextureID);
+      }
+
+      glEnable(GL_DEPTH_TEST);
+      glDisable(GL_BLEND);
+
 }
 
 void Bamboo::RN_SpotLight::ItlPreRenderChildren()
 {
-    //save current viewport params
-    glGetIntegerv(GL_VIEWPORT, m_iGeneralViewportParams);
+    glm::mat4 mViewProjectionMatrix = m_m4ProjectionMatrix * m_m4ViewMatrix;
 
-    //bind fbo
-    glBindFramebuffer(GL_FRAMEBUFFER, m_nFBO);
+   // m_m4LastUsedViewProjectionMatrix = glm::mat4();
 
-    //set viewport size
-    glViewport(0,0, SHADOWMAP_RESOLUTION, SHADOWMAP_RESOLUTION);
+    if (mViewProjectionMatrix != m_m4LastUsedViewProjectionMatrix || m_vLightPosition != m_v3LastUsedLightPosition)
+    {
+        //bind fbo
+        glBindFramebuffer(GL_FRAMEBUFFER, m_nFBO);
 
-    // clear buffers
-   // glClearColor(0.0, 0.0, 0.0, 0.0);
-    //glClearDepth(1.0);
-    glClear(GL_DEPTH_BUFFER_BIT);
+        //set viewport size
+        glViewport(0,0, SHADOWMAP_RESOLUTION, SHADOWMAP_RESOLUTION);
 
-    ///store our fbo-id on the stack, to allow "deeper" SceneObject_FBOs to rebind our fbo after finish drawing
-    ItlPushFBO(m_nFBO);
+        // clear buffers
+       // glClearColor(0.0, 0.0, 0.0, 0.0);
+        //glClearDepth(1.0);
+        glClear(GL_DEPTH_BUFFER_BIT);
 
-    // change matrices, so that the scene is rendered from the view of the light
-    ItlChangeMatrices();
+        ///store our fbo-id on the stack, to allow "deeper" SceneObject_FBOs to rebind our fbo after finish drawing
+        ItlPushFBO(m_nFBO);
+
+        // change matrices, so that the scene is rendered from the view of the light
+        ItlChangeMatrices();
+
+        ItlPushViewportInformation(SHADOWMAP_RESOLUTION, SHADOWMAP_RESOLUTION);
+
+        m_bHasChildren = (!m_vChildren.empty());
+    }
+    else
+    {
+        m_bHasChildren = false;
+    }
 }
 
 void Bamboo::RN_SpotLight::ItlPostRenderChildren()
 {
-    // restore matrices
-    ItlRestoreMatrices();
+    glm::mat4 mViewProjectionMatrix = m_m4ProjectionMatrix * m_m4ViewMatrix;
 
-    //remove the fbo (THIS fbo) from the bound_fbos stack
-    ItlPopFBO();
-
-    //if there was a SceneObject_FBO bound in the SceneObject_Tree, rebind the previous bound fbo
-    if (ItlIsNestedFBO())
+    if (mViewProjectionMatrix != m_m4LastUsedViewProjectionMatrix || m_vLightPosition != m_v3LastUsedLightPosition)
     {
-        GLuint previous_bound = ItlGetTopFBO();
-        glBindFramebuffer(GL_FRAMEBUFFER, previous_bound);
+      // restore matrices
+      ItlRestoreMatrices();
+
+      //remove the fbo (THIS fbo) from the bound_fbos stack
+      ItlPopFBO();
+      ItlPopViewportInformation();
+
+      //if there was a SceneObject_FBO bound in the SceneObject_Tree, rebind the previous bound fbo
+      if (ItlIsNestedFBO())
+      {
+          GLuint previous_bound = ItlGetTopFBO();
+          glBindFramebuffer(GL_FRAMEBUFFER, previous_bound);
+      }
+      else
+          glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+      int iOldWidth, iOldHeight;
+
+      ItlGetTopViewportInformation(iOldWidth, iOldHeight);
+
+      //restore viewport params
+      glViewport(0, 0, iOldWidth, iOldHeight);
+
+      m_m4LastUsedViewProjectionMatrix = mViewProjectionMatrix;
+      m_v3LastUsedLightPosition = m_vLightPosition;
     }
-    else
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    //restore viewport params
-    glViewport(m_iGeneralViewportParams[0], m_iGeneralViewportParams[1], m_iGeneralViewportParams[2], m_iGeneralViewportParams[3]);
-
-
 }
 
 void Bamboo::RN_SpotLight::ItlChangeMatrices()

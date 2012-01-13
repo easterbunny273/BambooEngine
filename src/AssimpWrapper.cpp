@@ -5,7 +5,7 @@
   */
 
 #include "AssimpWrapper.h"
-#include "Logger.h"
+#include "PC_Logger.h"
 
 #include <assimp/assimp.hpp>
 #include <assimp/aiPostProcess.h>
@@ -27,8 +27,11 @@ std::shared_ptr<GeometryData::GenericObject> AssimpWrapper::LoadModel(std::strin
                                              aiProcess_GenSmoothNormals		|
                                              aiProcess_ImproveCacheLocality |
                                              aiProcess_FindInvalidData |
+                                             //aiProcess_MakeLeftHanded |
                                              //aiProcess_OptimizeMeshes |
                                              //aiProcess_OptimizeGraph  |
+                                             aiProcess_GenUVCoords |
+                                             aiProcess_TransformUVCoords |
                                              aiProcess_FlipUVs |
                                              aiProcess_FindDegenerates |
                                              aiProcess_SortByPType
@@ -170,7 +173,7 @@ std::shared_ptr<GeometryData::GenericObject> AssimpWrapper::LoadModel(std::strin
 
             pGenericMesh->AddAttributeValues(GeometryData::GenericData::DATA_BITANGENTS,
                                        3 * nNumVertices,
-                                       &vfTangents[0]);
+                                       &vfBitangents[0]);
         }
 
 
@@ -234,18 +237,23 @@ std::shared_ptr<GeometryData::GenericObject> AssimpWrapper::LoadModel(std::strin
                 switch (iTextureType)
                 {
                 case aiTextureType_DIFFUSE:
+                    Logger::debug() << "diffuse " << std::string(sTexturePath.data) << Logger::endl;
                     tTextureType = GeometryData::TextureNames::ALBEDO;
                     break;
                 case aiTextureType_NORMALS:
+                    Logger::debug() << "normals " << std::string(sTexturePath.data) << Logger::endl;
                     tTextureType = GeometryData::TextureNames::NORMAL;
                     break;
                 case aiTextureType_SPECULAR:
+                    Logger::debug() << "specular " << std::string(sTexturePath.data) << Logger::endl;
                     tTextureType = GeometryData::TextureNames::SPECULAR;
                     break;
                 case aiTextureType_HEIGHT:
+                    Logger::debug() << "height " << std::string(sTexturePath.data) << Logger::endl;
                     tTextureType = GeometryData::TextureNames::NORMAL;
                     break;
                 case aiTextureType_DISPLACEMENT:
+                    Logger::debug() << "displacement " << std::string(sTexturePath.data) << Logger::endl;
                     tTextureType = GeometryData::TextureNames::DISPLACE;
                     break;
                 default:

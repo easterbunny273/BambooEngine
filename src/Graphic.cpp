@@ -17,7 +17,7 @@
 #include "common_gl.h"
 #include "ShaderManager.h"
 #include "TextureManager.h"
-#include "Logger.h"
+#include "PC_Logger.h"
 #include "RenderNodes/IRenderNode.h"
 #include "RenderNodes/RenderNode_PostEffect.h"
 #include "RenderNodes/RenderNode_RenderPass.h"
@@ -161,6 +161,7 @@ void Bamboo::ItlBuildRenderGraph(Bamboo::TItlRenderLoop &tRenderLoop)
     GetShaderManager()->AddShader("posteffect1", new Bamboo::Shader("BambooEngine/shaders/posteffect1.vs", "BambooEngine/shaders/posteffect1.fs"));
     GetShaderManager()->AddShader("directwrite", new Bamboo::Shader("BambooEngine/shaders/directwrite.vs", "BambooEngine/shaders/directwrite.fs"));
 
+
     static int a=0;
 
     std::string psSceneColorTextures[] = { "scene_color1", "scene_color2" };
@@ -196,11 +197,22 @@ void Bamboo::ItlBuildDeferredRenderPipeline(Bamboo::TItlRenderLoop &tRenderLoop)
 {
     tRenderLoop.spRenderGraph = std::shared_ptr<Bamboo::IRenderNode>(new Bamboo::RN_Camera(tRenderLoop.spCamera.get()));
 
+    tRenderLoop.spRenderGraph->SetInitialViewportInformation(1024,768);
+
     // load shader, if not loaded
     GetShaderManager()->AddShader("posteffect1", new Bamboo::Shader("BambooEngine/shaders/posteffect1.vs", "BambooEngine/shaders/posteffect1.fs"));
     GetShaderManager()->AddShader("directwrite", new Bamboo::Shader("BambooEngine/shaders/directwrite.vs", "BambooEngine/shaders/directwrite.fs"));
-    GetShaderManager()->AddShader("camera-debug", new Bamboo::Shader("BambooEngine/shaders/camera-debug.vs", "BambooEngine/shaders/camera-debug.fs"));
+    GetShaderManager()->AddShader("light-pass", new Bamboo::Shader("BambooEngine/shaders/light_pass.vs", "BambooEngine/shaders/light_pass.fs"));
     GetShaderManager()->AddShader("camera-debug2", new Bamboo::Shader("BambooEngine/shaders/camera-debug2.vs", "BambooEngine/shaders/camera-debug2.fs"));
+    GetTextureManager()->LoadTexture("spotlight", "textures/spot.png", false);
+
+
+    std::shared_ptr<Bamboo::IRenderNode> spAntiAliasFBO(new Bamboo::RN_FBO(2048, 768*2, "test1", "test1_depth"));
+    std::shared_ptr<Bamboo::RN_PostEffect> spAntiAliasPostEffect(new Bamboo::RN_PostEffect("posteffect1"));
+    spAntiAliasPostEffect->SetTexture("texture1", "test1");
+    spAntiAliasPostEffect->SetTexture("texture3",  "test1_depth");
+
+    spAntiAliasPostEffect->AddChild(spAntiAliasFBO);
 
     std::shared_ptr<Bamboo::RN_Deferred> spDeferredNode(new Bamboo::RN_Deferred(1024,768));
 
@@ -247,5 +259,7 @@ void Bamboo::ItlBuildDeferredRenderPipeline(Bamboo::TItlRenderLoop &tRenderLoop)
         spDeferredNode->AddChild(spRenderNode);
     }
 
-    tRenderLoop.spRenderGraph->AddChild(spDeferredNode);
+    spAntiAliasFBO->AddChild(spDeferredNode);
+
+    tRenderLoop.spRenderGraph->AddChild(spAntiAliasPostEffect);
 }
