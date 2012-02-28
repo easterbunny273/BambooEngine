@@ -28,7 +28,7 @@ Bamboo::RN_Generic::RN_Generic(std::shared_ptr<GeometryData::GenericObject> spOb
       m_pnSpecularTexture(NULL),
       m_pnDisplaceTexture(NULL),
       m_spObject(spObject),
-      m_bIsSphere(false)
+      m_bUseEnvironmentMapping(false)
 {
     ItlLoadShader();
     ItlPrepareGLBuffers();
@@ -41,18 +41,14 @@ Bamboo::RN_Generic::~RN_Generic()
     ItlDeleteTextures();
 }
 
+void Bamboo::RN_Generic::SetEnvironmentMap(GLuint nTextureID)
+{
+  m_bUseEnvironmentMapping = true;
+  m_nEnvironmentMap = nTextureID;
+}
+
 void Bamboo::RN_Generic::ItlRender()
 {
-    static int i=0;
-
-    i++;
-
-    glm::mat4 oldTrans1;
-
-    oldTrans1 = glm::rotate(glm::mat4(), i / 100.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-
-   // SetTransformMatrix(oldTrans1);
-
     TextureManager *pTextureManager = ItlGetGraphicCore()->GetTextureManager();
     assert (pTextureManager != NULL);
 
@@ -72,7 +68,7 @@ void Bamboo::RN_Generic::ItlRender()
 
     if (iLocationIsSphere != -1)
       {
-        if (m_bIsSphere == false)
+        if (m_bUseEnvironmentMapping == false)
           glUniform1i(iLocationIsSphere, false);
         else
           {
@@ -83,11 +79,11 @@ void Bamboo::RN_Generic::ItlRender()
             if (iLocationCubeMap != -1)
               {
                 glActiveTexture(GL_TEXTURE0+iTextureUnitForCubeMap);
-                glBindTexture(GL_TEXTURE_CUBE_MAP, 13);
+                glBindTexture(GL_TEXTURE_CUBE_MAP, m_nEnvironmentMap);
                 glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
                 glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-                glUniform1i(iLocationCubeMap, 15);
+                glUniform1i(iLocationCubeMap, iTextureUnitForCubeMap);
                 glUniform1i(iLocationIsSphere, true);
               }
 
@@ -215,8 +211,8 @@ void Bamboo::RN_Generic::ItlPrepareGLBuffers()
             }
         }
 
-        if (spMesh->GetTexturePath(GeometryData::TextureNames::CUBEMAP).empty() == false)
-          m_bIsSphere = true;
+      //if (spMesh->GetTexturePath(GeometryData::TextureNames::CUBEMAP).empty() == false)
+        //  m_bUseEnvironmentMapping = true;
 
         for (unsigned int i=0; i < 4; i++)
         {

@@ -9,10 +9,8 @@
 #ifndef __BAMBOOENGINE_DEFERREDNODETRANSLATOR_HEADER
 #define __BAMBOOENGINE_DEFERREDNODETRANSLATOR_HEADER
 
-#include "common_gl.h"
-#include "Graphic.h"
-#include "RenderNodes/IRenderNode.h"
 #include "INodeTranslator.h"
+#include "RenderNodes/RenderNode_Deferred.h"
 
 #include <memory>
 
@@ -31,8 +29,10 @@ public:
     class IRuleObject
     {
     public:
+      virtual IRuleObject * CloneFor(std::shared_ptr<ISemanticSceneNode> spSemNode, DeferredNodeTranslator *pTranslator) = 0;
+
       /// update the rendering scene graph pieces which correspond to the given semantic scene node
-      virtual void Action(std::shared_ptr<ISemanticSceneNode> spSemNode) = 0;
+      virtual void Action() = 0;
 
       /// return a vector with the class ids of the semantic scene nodes, which were accepted (and handled) by this rule object
       virtual std::vector<ISemanticSceneNode::t_classID> GetAcceptedNodeIDs() const = 0;
@@ -48,14 +48,15 @@ public:
         return false;
       }
 
-    private:
+    protected:
       DeferredNodeTranslator * m_pTranslator;
+      std::shared_ptr<ISemanticSceneNode> m_spSemNode;
     };
   //@}
 
   /*! \name Construction / Destruction */
   //@{
-      DeferredNodeTranslator();
+      DeferredNodeTranslator(Bamboo *pCore);
       ~DeferredNodeTranslator();
   //@}
 
@@ -70,18 +71,25 @@ public:
 
   /*! \name INodeTranslator interface */
   //@{
-    virtual std::shared_ptr<Bamboo::IRenderNode> Translate(std::shared_ptr<ISemanticSceneNode> spSemRoot);
+    virtual void Translate(std::shared_ptr<ISemanticSceneNode> spSemRoot);
   //@}
 
 private:
   /*! \name Internal methods */
   //@{
       void ItlRegisterRuleObjectPrototype(std::shared_ptr<IRuleObject> pObject);
+
+      void ItlTranslateSemNode(std::shared_ptr<ISemanticSceneNode> spSemNode);
   //@}
 
   std::map<ISemanticSceneNode::t_objectID, std::shared_ptr<IRuleObject> > m_mCachedRuleObjects;
 
   std::map<ISemanticSceneNode::t_classID, std::shared_ptr<IRuleObject> > m_mRegisteredRuleObjects;
+
+  std::vector<std::shared_ptr<Bamboo::IRenderNode> > m_vLightNodes;
+  std::vector<std::shared_ptr<Bamboo::IRenderNode> > m_vShadowCasterNodes;
+
+  std::shared_ptr<Bamboo::RN_Deferred>    m_spDeferredNode;
 };
 
 #endif
