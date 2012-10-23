@@ -74,7 +74,7 @@ void GraphicsCore::RN_PostEffect::ItlPreRender()
 void GraphicsCore::RN_PostEffect::ItlRender()
 {
     // get texture manager
-    GraphicsCore::TextureManager *pTextureManager = ItlGetGraphicCore()->GetTextureManager();
+    TextureManager *pTextureManager = ItlGetGraphicCore()->GetTextureManager();
     assert (pTextureManager != NULL);
 
     std::vector <GLuint> vManualLockedUnits;

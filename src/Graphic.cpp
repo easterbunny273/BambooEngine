@@ -103,7 +103,7 @@ ShaderManager * GraphicsCore::GetShaderManager()
 
 /****************************************************************
   *************************************************************** */
-GraphicsCore::TextureManager * GraphicsCore::GetTextureManager()
+TextureManager * GraphicsCore::GetTextureManager()
 {
     assert (m_pTextureManager != NULL);
 

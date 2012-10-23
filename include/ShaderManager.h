@@ -51,7 +51,7 @@ namespace BambooGraphics
                 TShader(const char *szVertexShaderFilename, const char *szTesselationControlShaderFilename, const char *szTesselationEvaluationShaderFilename, const char *szGeometryShaderFilename, const char *szFragmentShaderFilename);
 
             /// Destructor
-            ~TShader();
+                ~TShader();
             //@}
 
             /*! \name Access to the shader programm */

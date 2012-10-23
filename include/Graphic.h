@@ -33,6 +33,7 @@ namespace BambooGraphics
     class INodeTranslator;
 
     class ShaderManager;
+    class TextureManager;
 
     class GraphicsCore
     {
@@ -40,7 +41,6 @@ namespace BambooGraphics
         /*! \name Internal classes, forward declarations */
         //@{
 
-            class TextureManager;
 
             class IRenderNode;
             class IRenderNode_Cullable;

@@ -30,7 +30,7 @@ GraphicsCore::RN_FBO::RN_FBO(int iWidth,
       m_szDepthTextureName(0)
 {
     // get texture manager
-    GraphicsCore::TextureManager *pTextureManager = ItlGetGraphicCore()->GetTextureManager();
+    TextureManager *pTextureManager = ItlGetGraphicCore()->GetTextureManager();
     assert (pTextureManager != NULL);
 
     //write down which rendertargets we use
@@ -150,7 +150,7 @@ GraphicsCore::RN_FBO::RN_FBO(int iWidth,
       m_szDepthTextureName(szDepthTextureName)
 {
     // get texture manager
-    GraphicsCore::TextureManager *pTextureManager = ItlGetGraphicCore()->GetTextureManager();
+    TextureManager *pTextureManager = ItlGetGraphicCore()->GetTextureManager();
     assert (pTextureManager != NULL);
 
     //write down which rendertargets we use
@@ -293,7 +293,7 @@ void GraphicsCore::RN_FBO::ItlPostRenderChildren()
     if (m_bMipMapped)
     {
         // get texture manager
-        GraphicsCore::TextureManager *pTextureManager = ItlGetGraphicCore()->GetTextureManager();
+        TextureManager *pTextureManager = ItlGetGraphicCore()->GetTextureManager();
         assert (pTextureManager != NULL);
 
         pTextureManager->UseTexture(m_szColorTextureName);

@@ -19,7 +19,7 @@ using namespace BambooLib;
 
 namespace BambooGraphics
 {
-    struct GraphicsCore::TextureManager::TImpl
+    struct TextureManager::TImpl
     {
         /*! \name Internal helper methods */
         //@{
@@ -48,18 +48,18 @@ namespace BambooGraphics
         //@}
     };
 
-    GraphicsCore::TextureManager::TextureManager()
+    TextureManager::TextureManager()
     {
         m_pImpl = new TImpl();
         m_pImpl->m_bDevIL_Initialized = false;
     }
 
-    GraphicsCore::TextureManager::~TextureManager()
+    TextureManager::~TextureManager()
     {
         delete m_pImpl;
     }
 
-    void GraphicsCore::TextureManager::TImpl::ItlInitialize()
+    void TextureManager::TImpl::ItlInitialize()
     {
         ilInit();
 
@@ -79,9 +79,9 @@ namespace BambooGraphics
         ItlInitializeSamplerObjects();
     }
 
-    bool GraphicsCore::TextureManager::LoadTexture(std::string sTextureName,
-                                             std::string sFilename,
-                                             bool bAlreadyGammaCorrected)
+    bool TextureManager::LoadTexture(std::string sTextureName,
+                                     std::string sFilename,
+                                     bool bAlreadyGammaCorrected)
     {
         // initialize devIl if necessary
         if (m_pImpl->m_bDevIL_Initialized == false)
@@ -100,7 +100,7 @@ namespace BambooGraphics
     }
 
 
-    bool GraphicsCore::TextureManager::LoadTexture(GLuint &rnTextureID,
+    bool TextureManager::LoadTexture(GLuint &rnTextureID,
                                              std::string sFilename,
                                              bool bAlreadyGammaCorrected)
     {
@@ -115,7 +115,7 @@ namespace BambooGraphics
     }
 
 
-    GLuint GraphicsCore::TextureManager::UseTexture(std::string sTextureName)
+    GLuint TextureManager::UseTexture(std::string sTextureName)
     {
         auto iter = m_pImpl->m_mTextureNames.find(sTextureName);
 
@@ -126,7 +126,7 @@ namespace BambooGraphics
         return UseTexture(nOpenGLID);
     }
 
-    GLuint GraphicsCore::TextureManager::UseTexture(GLuint nTextureID)
+    GLuint TextureManager::UseTexture(GLuint nTextureID)
     {
         // request a free unit
         GLuint nFreeUnit = RequestFreeUnit();
@@ -148,7 +148,7 @@ namespace BambooGraphics
         return nFreeUnit;
     }
 
-    void GraphicsCore::TextureManager::UnuseTexture(std::string sTextureName)
+    void TextureManager::UnuseTexture(std::string sTextureName)
     {
         auto iter = m_pImpl->m_mTextureNames.find(sTextureName);
 
@@ -159,7 +159,7 @@ namespace BambooGraphics
         return UnuseTexture(nOpenGLID);
     }
 
-    void GraphicsCore::TextureManager::UnuseTexture(GLuint nTextureID)
+    void TextureManager::UnuseTexture(GLuint nTextureID)
     {
         // get map entry
         auto iter = m_pImpl->m_mTextureInUse.find(nTextureID);
@@ -177,7 +177,7 @@ namespace BambooGraphics
         ReleaseUnit(nUsedUnit);
     }
 
-    GLuint GraphicsCore::TextureManager::RequestFreeUnit()
+    GLuint TextureManager::RequestFreeUnit()
     {
         if (m_pImpl->m_bDevIL_Initialized == false)
             m_pImpl->ItlInitialize();
@@ -191,7 +191,7 @@ namespace BambooGraphics
         return nFreeUnit;
     }
 
-    void GraphicsCore::TextureManager::ReleaseUnit(GLuint nUnit)
+    void TextureManager::ReleaseUnit(GLuint nUnit)
     {
     #ifdef DEBUG
       bool bOk = true;
@@ -208,7 +208,7 @@ namespace BambooGraphics
         m_pImpl->m_lFreeUnits.push_back(nUnit);
     }
 
-    void GraphicsCore::TextureManager::RegisterManualTexture(std::string sTextureName, GLuint nTextureID)
+    void TextureManager::RegisterManualTexture(std::string sTextureName, GLuint nTextureID)
     {
         Logger::debug() << "Registered manual texture \"" << sTextureName << "\" with id " << nTextureID << Logger::endl;
 
@@ -219,7 +219,7 @@ namespace BambooGraphics
         assert (m_pImpl->m_mTextureNames.size() != nOldSize);
     }
 
-    bool GraphicsCore::TextureManager::TImpl::ItlLoadTextureFromFile(GLuint &rnTextureID, std::string sFilename, bool bAlreadyGammaCorrected)
+    bool TextureManager::TImpl::ItlLoadTextureFromFile(GLuint &rnTextureID, std::string sFilename, bool bAlreadyGammaCorrected)
     {
         Logger::debug() << "Try to load texture from \"" << sFilename << "\"" << Logger::endl;
 
@@ -289,7 +289,7 @@ namespace BambooGraphics
         }
     }
 
-    bool GraphicsCore::TextureManager::IsTextureRegistered(std::string sTextureName, GLuint &rnTextureID)
+    bool TextureManager::IsTextureRegistered(std::string sTextureName, GLuint &rnTextureID)
     {
         auto iter = m_pImpl->m_mTextureNames.find(sTextureName);
 
@@ -301,7 +301,7 @@ namespace BambooGraphics
         return bIsRegistered;
     }
 
-    void GraphicsCore::TextureManager::TImpl::ItlInitializeSamplerObjects()
+    void TextureManager::TImpl::ItlInitializeSamplerObjects()
     {
         glGenSamplers(1 , &m_pSamplerObjects[CLAMPED_NEAREST_FILTERING]);
         glSamplerParameteri(m_pSamplerObjects[CLAMPED_NEAREST_FILTERING], GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

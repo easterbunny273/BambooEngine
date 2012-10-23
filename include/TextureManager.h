@@ -22,7 +22,7 @@ namespace BambooGraphics
      *  and for binding/unbinding textures to a free texture unit,
      *  where the caller must not think about the use of the texture units.
      */
-    class GraphicsCore::TextureManager
+    class TextureManager
     {
     public:
 
