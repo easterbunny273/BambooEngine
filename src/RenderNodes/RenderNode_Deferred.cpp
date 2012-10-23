@@ -7,10 +7,12 @@
 
 using namespace BambooLib;
 
-extern int s_DebugDeferredTexture;
-extern int s_nUseParallax;
+//extern int s_DebugDeferredTexture;
+//extern int s_nUseParallax;
 
-Bamboo::RN_Deferred::RN_Deferred(unsigned int nWidth, unsigned int nHeight, bool bLayered /* = FALSE */)
+namespace BambooGraphics
+{
+GraphicsCore::RN_Deferred::RN_Deferred(unsigned int nWidth, unsigned int nHeight, bool bLayered /* = FALSE */)
     : m_nWidth(nWidth), m_nHeight(nHeight)
 {
   if (bLayered)
@@ -23,14 +25,14 @@ Bamboo::RN_Deferred::RN_Deferred(unsigned int nWidth, unsigned int nHeight, bool
     Logger::debug() << "RN_Deferred created" << Logger::endl;
 }
 
-Bamboo::RN_Deferred::~RN_Deferred()
+GraphicsCore::RN_Deferred::~RN_Deferred()
 {
     ItlDeleteFBO();
 
     Logger::debug() << "RN_Deferred destroyed" << Logger::endl;
 }
 
-void Bamboo::RN_Deferred::ItlCreateFBO()
+void GraphicsCore::RN_Deferred::ItlCreateFBO()
 {
     TextureManager *pTextureManager = ItlGetGraphicCore()->GetTextureManager();
     assert (pTextureManager != NULL);
@@ -84,7 +86,7 @@ void Bamboo::RN_Deferred::ItlCreateFBO()
     m_bLayeredFBO = false;
 }
 
-void Bamboo::RN_Deferred::ItlCreateLayeredFBO()
+void GraphicsCore::RN_Deferred::ItlCreateLayeredFBO()
 {
   TextureManager *pTextureManager = ItlGetGraphicCore()->GetTextureManager();
   assert (pTextureManager != NULL);
@@ -177,7 +179,7 @@ void Bamboo::RN_Deferred::ItlCreateLayeredFBO()
 }
 
 
-GLuint Bamboo::RN_Deferred::ItlCreateColorTexture()
+GLuint GraphicsCore::RN_Deferred::ItlCreateColorTexture()
 {
     GLuint nNewTexture;
 
@@ -204,7 +206,7 @@ GLuint Bamboo::RN_Deferred::ItlCreateColorTexture()
     return nNewTexture;
 }
 
-GLuint Bamboo::RN_Deferred::ItlCreateLayeredColorTexture()
+GLuint GraphicsCore::RN_Deferred::ItlCreateLayeredColorTexture()
 {
   GLenum error = glGetError();
   assert (error == GL_NO_ERROR);
@@ -246,7 +248,7 @@ GLuint Bamboo::RN_Deferred::ItlCreateLayeredColorTexture()
   return nNewTexture;
 }
 
-GLuint Bamboo::RN_Deferred::ItlCreateDepthTexture()
+GLuint GraphicsCore::RN_Deferred::ItlCreateDepthTexture()
 {
     GLuint nNewTexture;
 
@@ -273,7 +275,7 @@ GLuint Bamboo::RN_Deferred::ItlCreateDepthTexture()
     return nNewTexture;
 }
 
-GLuint Bamboo::RN_Deferred::ItlCreateLayeredDepthTexture()
+GLuint GraphicsCore::RN_Deferred::ItlCreateLayeredDepthTexture()
 {
   GLenum error = glGetError();
   assert (error == GL_NO_ERROR);
@@ -312,14 +314,14 @@ GLuint Bamboo::RN_Deferred::ItlCreateLayeredDepthTexture()
   return nNewTexture;
 }
 
-void Bamboo::RN_Deferred::ItlDeleteFBO()
+void GraphicsCore::RN_Deferred::ItlDeleteFBO()
 {
     ItlDeleteTextures();
 
     glDeleteFramebuffers(1, &m_nFBO);
 }
 
-void Bamboo::RN_Deferred::ItlDeleteTextures()
+void GraphicsCore::RN_Deferred::ItlDeleteTextures()
 {
     glDeleteTextures(1, &m_nAlbedoDrawBuffer);
     glDeleteTextures(1, &m_nNormalDrawBuffer);
@@ -331,7 +333,7 @@ void Bamboo::RN_Deferred::ItlDeleteTextures()
     glDeleteTextures(1, &m_nPositionDrawBuffer);
 }
 
-void Bamboo::RN_Deferred::ItlPreRenderChildren()
+void GraphicsCore::RN_Deferred::ItlPreRenderChildren()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, m_nFBO);
 
@@ -354,13 +356,13 @@ void Bamboo::RN_Deferred::ItlPreRenderChildren()
     GLuint l_nUseParallax = ItlGetGraphicCore()->GetShaderManager()->GetUniform("nUseParallax");
 
     assert (l_nUseParallax != -1);
-    glUniform1i(l_nUseParallax, s_nUseParallax % 2);
+    //glUniform1i(l_nUseParallax, s_nUseParallax % 2);
 
     ItlPushViewportInformation(m_nWidth, m_nHeight);
 
 }
 
-void Bamboo::RN_Deferred::ItlPostRenderChildren()
+void GraphicsCore::RN_Deferred::ItlPostRenderChildren()
 {
     // todo:: fault?
     ItlGetGraphicCore()->GetShaderManager()->PushActiveShader();
@@ -387,11 +389,11 @@ void Bamboo::RN_Deferred::ItlPostRenderChildren()
     glViewport(0, 0, iOldWidth, iOldHeight);
 }
 
-void Bamboo::RN_Deferred::ItlPreRender()
+void GraphicsCore::RN_Deferred::ItlPreRender()
 {
 }
 
-void Bamboo::RN_Deferred::ItlRender()
+void GraphicsCore::RN_Deferred::ItlRender()
 {
   if (m_bLayeredFBO == false)
     {
@@ -414,7 +416,7 @@ void Bamboo::RN_Deferred::ItlRender()
       {
           glClear(GL_STENCIL_BUFFER_BIT);
 
-          std::shared_ptr<Bamboo::RN_SpotLight> spLight (m_vspSpotLights[a]);
+          std::shared_ptr<GraphicsCore::RN_SpotLight> spLight (m_vspSpotLights[a]);
           spLight->SetTextureLocation("color_texture", m_nAlbedoDrawBuffer);
           spLight->SetTextureLocation("normal_texture", m_nNormalDrawBuffer);
           spLight->SetTextureLocation("tangent_texture", m_nTangentDrawBuffer);
@@ -458,13 +460,13 @@ void Bamboo::RN_Deferred::ItlRender()
 
       // ---BEGIN ---- this is just for debugging!
 
-      static Bamboo::RN_PostEffect rPostEffectNode("directwrite");
+      static GraphicsCore::RN_PostEffect rPostEffectNode("directwrite");
 
-      GLuint nTextureToShow;
+      GLuint nTextureToShow=m_nAlbedoDrawBuffer;
 
      // std::cout << s_DebugDeferredTexture << std::endl;
 
-      switch (s_DebugDeferredTexture % 6)
+      /*switch (s_DebugDeferredTexture % 6)
       {
       case 0:
           nTextureToShow = m_nAlbedoDrawBuffer;
@@ -484,7 +486,7 @@ void Bamboo::RN_Deferred::ItlRender()
       case 5:
           nTextureToShow = m_nSpecularDrawBuffer;
           break;
-      }
+      }*/
 
       rPostEffectNode.SetTexture("texture1", nTextureToShow );
 
@@ -504,13 +506,13 @@ void Bamboo::RN_Deferred::ItlRender()
 
 }
 
-void Bamboo::RN_Deferred::ItlPostRender()
+void GraphicsCore::RN_Deferred::ItlPostRender()
 {
 }
 
-void Bamboo::RN_Deferred::AddSpotLight(std::shared_ptr<Bamboo::RN_SpotLight> spSpotlight)
+void GraphicsCore::RN_Deferred::AddSpotLight(std::shared_ptr<GraphicsCore::RN_SpotLight> spSpotlight)
 {
     m_vspSpotLights.push_back(spSpotlight);
 }
 
-
+}

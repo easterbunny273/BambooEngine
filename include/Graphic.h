@@ -26,156 +26,160 @@
 // semantic scene node interface
 #include "SemanticSceneNodes/ISemanticSceneNode.h"
 
-// forward declarations
-class SceneObject_RenderTarget;
-class INodeTranslator;
-
-class Bamboo
+namespace BambooGraphics
 {
-public:
-    /*! \name Internal classes, forward declarations */
-    //@{
-        class Shader;
-        class ShaderManager;
-        class TextureManager;
+    // forward declarations
+    class SceneObject_RenderTarget;
+    class INodeTranslator;
 
-        class IRenderNode;
-        class IRenderNode_Cullable;
 
-        class RN_PostEffect;
-        class RN_Camera;
-        class RN_FBO;
-        class RN_RenderPass;
-        class RN_BoundingBox;
-        class RN_AssimpImport;
-        class RN_Generic;
-        class RN_Deferred;
-        class RN_SpotLight;
-        class RN_CubeMap;
-        class RN_SpotLight_Model;
-    //@}
+    class GraphicsCore
+    {
+    public:
+        /*! \name Internal classes, forward declarations */
+        //@{
+            class ShaderManager;
+            class TextureManager;
 
-public:
-    /*! \name Nested classes, forward declarations */
-    //@{
-        class IRenderTarget
-        {
-        public:
-            /*! \name Public interfaces */
-            //@{
-                /// Interface for event listener, which receives the input events which happened in a glfw window
-                class IInputEventListener
-                {
-                public:
-                    /// handles keyboard events and sends signals to listener
-                    virtual void ItlHandleKeyboardEvent(int iKeyIdentifier, int iNewKeyState) = 0;
+            class IRenderNode;
+            class IRenderNode_Cullable;
 
-                    /// handles mouse movements and sends signals to the listener
-                    virtual void ItlHandleMousePos(int iX, int iY) = 0;
+            class RN_PostEffect;
+            class RN_Camera;
+            class RN_FBO;
+            class RN_RenderPass;
+            class RN_BoundingBox;
+            class RN_AssimpImport;
+            class RN_Generic;
+            class RN_Deferred;
+            class RN_SpotLight;
+            class RN_CubeMap;
+            class RN_SpotLight_Model;
+        //@}
 
-                    /// handles mouse wheel input events and sends signals to the listener
-                    virtual void ItlHandleMouseWheel(int iPosition) = 0;
+    public:
+        /*! \name Nested classes, forward declarations */
+        //@{
+            class IRenderTarget
+            {
+            public:
+                /*! \name Public interfaces */
+                //@{
+                    /// Interface for event listener, which receives the input events which happened in a glfw window
+                    class IInputEventListener
+                    {
+                    public:
+                        /// handles keyboard events and sends signals to listener
+                        virtual void ItlHandleKeyboardEvent(int iKeyIdentifier, int iNewKeyState) = 0;
 
-                    /// handles mouse button events and sends signals to the listener
-                    virtual void ItlHandleMouseButton(int iButton, int iAction) = 0;
-                };
-            //@}
+                        /// handles mouse movements and sends signals to the listener
+                        virtual void ItlHandleMousePos(int iX, int iY) = 0;
 
-            virtual void ClearBuffers() = 0;
-            virtual void SwapBuffers() = 0;
+                        /// handles mouse wheel input events and sends signals to the listener
+                        virtual void ItlHandleMouseWheel(int iPosition) = 0;
 
-        protected:
-            IRenderTarget() {}
-            virtual ~IRenderTarget() {}
-        };
-    //@}
+                        /// handles mouse button events and sends signals to the listener
+                        virtual void ItlHandleMouseButton(int iButton, int iAction) = 0;
+                    };
+                //@}
 
-    /*! \name Nested classes, forward declarations */
-    //@{
-#ifdef GLFW
-        class GlfwWindow;
-#endif
-#ifdef QT_OPENGL_LIB
-        class QtWidgetWrapper;
-#endif
-        class ICamera;
-        class PerspectiveCamera;
-        class OrthogonalCamera;
+                virtual void ClearBuffers() = 0;
+                virtual void SwapBuffers() = 0;
 
-        class LightManager;
-    //@}
+            protected:
+                IRenderTarget() {}
+                virtual ~IRenderTarget() {}
+            };
+        //@}
 
-    /*! \name Nested classes */
-    //@{
+        /*! \name Nested classes, forward declarations */
+        //@{
+    #ifdef GLFW
+            class GlfwWindow;
+    #endif
+    #ifdef QT_OPENGL_LIB
+            class QtWidgetWrapper;
+    #endif
+            class ICamera;
+            class PerspectiveCamera;
+            class OrthogonalCamera;
 
-    //@}
+            class LightManager;
+        //@}
 
-    /*! \name Construction / Destruction */
-    //@{
-        /// constructor
-        Bamboo();
+        /*! \name Nested classes */
+        //@{
 
-        /// destructor
-        ~Bamboo();
-    //@}
+        //@}
 
-    /*! \name Public Attributes */
-    //@{
-	/// returns the responsible shader manager for this graphics instance
-	ShaderManager * GetShaderManager();
+        /*! \name Construction / Destruction */
+        //@{
+            /// constructor
+            GraphicsCore();
 
-	/// returns the responsible texture manager for this graphics instance
-	TextureManager * GetTextureManager();
+            /// destructor
+            ~GraphicsCore();
+        //@}
 
-        /// workaround method, should be removed
-        static Bamboo * GetSingleInstance() { return s_pInstance; }
-    //@}
+        /*! \name Public Attributes */
+        //@{
+        /// returns the responsible shader manager for this graphics instance
+        ShaderManager * GetShaderManager();
 
-    /*! \name Methods for render */
-    //@{
-        /// renders all render loops to their render targets
-        void Render();
-    //@}
+        /// returns the responsible texture manager for this graphics instance
+        TextureManager * GetTextureManager();
 
-    /*! \name new methods - refactoring - comments tbd */
-    //@{
-        /// adds a render loop and returns its id
-        int AddRenderLoop(std::shared_ptr<IRenderTarget> spRenderTarget,
-                          std::shared_ptr<ISemanticSceneNode> spRootNode,
-                          std::shared_ptr<INodeTranslator> spTranslator);
+            /// workaround method, should be removed
+            static GraphicsCore * GetSingleInstance() { return s_pInstance; }
+        //@}
 
-        /// removes a render loop
-        void RemoveRenderLoop(int iLoopID);
-    //@}
+        /*! \name Methods for render */
+        //@{
+            /// renders all render loops to their render targets
+            void Render();
+        //@}
 
-private:
-    /*! \name Nested classes and structs */
-    //@{
-        struct TItlRenderLoop
-        {
-            std::shared_ptr<IRenderTarget>      spRenderTarget;
-            std::shared_ptr<ISemanticSceneNode> spSceneRoot;
-            std::shared_ptr<INodeTranslator>    spTranslator;
-        };
-    //@}
+        /*! \name new methods - refactoring - comments tbd */
+        //@{
+            /// adds a render loop and returns its id
+            int AddRenderLoop(std::shared_ptr<IRenderTarget> spRenderTarget,
+                              std::shared_ptr<ISemanticSceneNode> spRootNode,
+                              std::shared_ptr<INodeTranslator> spTranslator);
 
-    /*! \name Internal helper methods */
-    //@{
+            /// removes a render loop
+            void RemoveRenderLoop(int iLoopID);
+        //@}
 
-    //@}
+    private:
+        /*! \name Nested classes and structs */
+        //@{
+            struct TItlRenderLoop
+            {
+                std::shared_ptr<IRenderTarget>      spRenderTarget;
+                std::shared_ptr<ISemanticSceneNode> spSceneRoot;
+                std::shared_ptr<INodeTranslator>    spTranslator;
+            };
+        //@}
 
-    /*! \name Private members */
-    //@{
-        std::map<int, TItlRenderLoop>   m_mRenderLoops;
+        /*! \name Internal helper methods */
+        //@{
 
-        ShaderManager       * m_pShaderManager;
-        TextureManager      * m_pTextureManager;
-    //@}
+        //@}
 
-    /*! \name Static members */
-    //@{
-        static Bamboo * s_pInstance;
-    //@}
-};
+        /*! \name Private members */
+        //@{
+            std::map<int, TItlRenderLoop>   m_mRenderLoops;
+
+            ShaderManager       * m_pShaderManager;
+            TextureManager      * m_pTextureManager;
+        //@}
+
+        /*! \name Static members */
+        //@{
+            static GraphicsCore * s_pInstance;
+        //@}
+    };
+
+}; // namespace
 
 #endif
