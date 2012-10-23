@@ -5,12 +5,22 @@
   */
 
 #include "AssimpWrapper.h"
-#include "PC_Logger.h"
+#include "BambooLib/include/Logger.h"
 
+/*
 #include <assimp/assimp.hpp>
 #include <assimp/aiPostProcess.h>
 #include <assimp/aiScene.h>
 #include <assimp/aiMesh.h>
+*/
+
+#include <assimp/Importer.hpp>      // C++ importer interface
+#include <assimp/scene.h>           // Output data structure
+#include <assimp/postprocess.h>
+
+#include <cassert>
+
+using namespace BambooLib;
 
 std::shared_ptr<GeometryData::GenericObject> AssimpWrapper::LoadModel(std::string sFilename)
 {
@@ -22,7 +32,7 @@ std::shared_ptr<GeometryData::GenericObject> AssimpWrapper::LoadModel(std::strin
                                              aiProcess_CalcTangentSpace	|
                                              aiProcess_ValidateDataStructure	|
                                              aiProcess_Triangulate		|
-                                             aiProcess_PreTransformVertices	|
+                                            // aiProcess_PreTransformVertices	|
                                              //aiProcess_JoinIdenticalVertices	|
                                              aiProcess_GenSmoothNormals		|
                                              aiProcess_ImproveCacheLocality |

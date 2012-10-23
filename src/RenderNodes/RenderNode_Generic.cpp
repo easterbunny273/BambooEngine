@@ -1,7 +1,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 //general includes
-#include "PC_Logger.h"
+#include "BambooLib/include/Logger.h"
 #include "ShaderManager.h"
 #include "TextureManager.h"
 
@@ -10,6 +10,8 @@
 
 //class specific
 #include "RenderNodes/RenderNode_Generic.h"
+
+using namespace BambooLib;
 
 GeometryData::TextureType tTextureTypes[4] = { GeometryData::TextureNames::ALBEDO,
                                                GeometryData::TextureNames::NORMAL,
@@ -33,17 +35,21 @@ Bamboo::RN_Generic::RN_Generic(std::shared_ptr<GeometryData::GenericObject> spOb
     ItlLoadShader();
     ItlPrepareGLBuffers();
     ItlPrepareTextures();
+
+    Logger::debug() << "RN_Generic created" << Logger::endl;
 }
 
 Bamboo::RN_Generic::~RN_Generic()
 {
     ItlDeleteBuffers();
     ItlDeleteTextures();
+
+    Logger::debug() << "RN_Generic destroyed" << Logger::endl;
 }
 
-void Bamboo::RN_Generic::SetEnvironmentMap(GLuint nTextureID)
+void Bamboo::RN_Generic::SetEnvironmentMapping(bool bEnabled, GLuint nTextureID /* = 0*/)
 {
-  m_bUseEnvironmentMapping = true;
+  m_bUseEnvironmentMapping = bEnabled;
   m_nEnvironmentMap = nTextureID;
 }
 
@@ -62,9 +68,7 @@ void Bamboo::RN_Generic::ItlRender()
 
 
     GLint iLocationIsSphere = pShaderManager->GetUniform("bIsSphere");
-    GLuint iTextureUnitForCubeMap = 15;//pTextureManager->RequestFreeUnit();
-
-   // std::cout << iTextureUnitForCubeMap << std::endl;
+    GLuint iTextureUnitForCubeMap = pTextureManager->RequestFreeUnit();
 
     if (iLocationIsSphere != -1)
       {
@@ -124,9 +128,10 @@ void Bamboo::RN_Generic::ItlRender()
         for (unsigned int i=0; i < vUsedTextures.size(); i++)
             pTextureManager->UnuseTexture(vUsedTextures[i]);
 
-        //pTextureManager->ReleaseUnit(iTextureUnitForCubeMap);
         vUsedTextures.clear();
     }
+
+    pTextureManager->ReleaseUnit(iTextureUnitForCubeMap);
 }
 
 

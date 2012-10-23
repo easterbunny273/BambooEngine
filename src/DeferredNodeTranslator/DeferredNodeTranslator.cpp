@@ -5,7 +5,9 @@
 #include "DeferredNodeTranslator/Light_RuleObject.h"
 #include "DeferredNodeTranslator/LoadedModel_RuleObject.h"
 
-#include "PC_Logger.h"
+#include "BambooLib/include/Logger.h"
+
+using namespace BambooLib;
 
 DeferredNodeTranslator::DeferredNodeTranslator(Bamboo *pCore) : INodeTranslator(pCore)
 {
@@ -40,7 +42,7 @@ void DeferredNodeTranslator::Translate(std::shared_ptr<ISemanticSceneNode> spSem
 
 void DeferredNodeTranslator::ItlRegisterRuleObjectPrototype(std::shared_ptr<IRuleObject> pObject)
 {
-  std::vector<ISemanticSceneNode::t_classID> vAcceptedIDs = pObject->GetAcceptedNodeIDs();
+  std::vector<BambooLib::t_classID> vAcceptedIDs = pObject->GetAcceptedNodeIDs();
 
   for (unsigned int i=0; i < vAcceptedIDs.size(); i++)
   {

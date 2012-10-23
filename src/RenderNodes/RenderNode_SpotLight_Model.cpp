@@ -1,10 +1,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "RenderNodes/RenderNode_SpotLight_Model.h"
-#include "PC_Logger.h"
+#include "BambooLib/include/Logger.h"
 #include "ShaderManager.h"
 #include "TextureManager.h"
 #include <iostream>
+
+using namespace BambooLib;
 
 #define NEARPLANE 0.01f
 #define FARPLANE 0.05f
@@ -33,7 +35,7 @@ Bamboo::RN_SpotLight_Model::RN_SpotLight_Model(glm::vec3 vPosition,
 
 Bamboo::RN_SpotLight_Model::~RN_SpotLight_Model()
 {
-
+  Logger::debug() << "RN_SpotLight_Model destroyed" << Logger::endl;
 }
 
 void Bamboo::RN_SpotLight_Model::ItlCreateVBO()

@@ -7,9 +7,11 @@
 #include <string>
 
 #include "TextureManager.h"
-#include "PC_Logger.h"
+#include "BambooLib/include/Logger.h"
 #include "ShaderManager.h"
 #include "RenderNodes/RenderNode_PostEffect.h"
+
+using namespace BambooLib;
 
 Bamboo::RN_PostEffect::RN_PostEffect(std::string sShaderToUse)
     : m_sShaderName(sShaderToUse)
@@ -50,12 +52,12 @@ Bamboo::RN_PostEffect::RN_PostEffect(std::string sShaderToUse)
     // prepare the vertex array object
     ItlPrepareVAO();
 
-    Logger::debug() << "SceneObject_PostEffect created" << Logger::endl;
+    Logger::debug() << "RN_PostEffect created" << Logger::endl;
 }
 
 Bamboo::RN_PostEffect::~RN_PostEffect()
 {
-
+  Logger::debug() << "RN_PostEffect destroyed" << Logger::endl;
 }
 
 void Bamboo::RN_PostEffect::ItlPreRender()

@@ -5,7 +5,9 @@
 
 #include <memory>                   // uses shared_ptr
 
-class Light_SemSceneNode : public ISemanticSceneNode
+#include "BambooLib/include/IIdentifyable.h"
+
+class Light_SemSceneNode : public ISemanticSceneNode, virtual public BambooLib::IIdentifyable
 {
 public:
   /*! \name Creation */
@@ -22,10 +24,12 @@ public:
     ~Light_SemSceneNode();
   //@}
 
-  /*! \name Class identification */
-  //@{
-    static t_classID ClassID();
-  //@}
+
+    /*! \name IIdentifyable interface */
+    //@{
+      static BambooLib::t_classID ClassID() { return s_ClassID; }
+      static Light_SemSceneNode * Cast(BambooLib::IIdentifyable *pObject) { return dynamic_cast<Light_SemSceneNode *>(pObject); }
+    //@}
 
   /*! \name Public methods */
   //@{
@@ -45,6 +49,25 @@ public:
                              glm::vec3 &rvLightColor,
                              float &rfNearplane,
                              float &rfFarplane);
+
+	/// Sets the light's position
+	void SetPosition(glm::vec3 vPosition);
+
+	/// Sets the light's look direction
+	void SetLookDirection(glm::vec3 vLookDirection);
+
+	/// Sets the light's FOV
+	void SetFOV(float fFOV);
+
+	/// Sets the light's color
+	void SetColor(glm::vec3 vColor);
+
+	/// Sets the light's nearplane
+	void SetNearplane(float fNearplane);
+
+	/// Sets the light's farplane
+	void SetFarplane(float fFarplane);
+
   //@}
 
 private:
@@ -63,6 +86,8 @@ private:
         float         m_fFOV,
                       m_fNearplane,
                       m_fFarplane;
+
+        static BambooLib::t_classID s_ClassID;
 
     //@}
 };

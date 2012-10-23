@@ -17,7 +17,7 @@
 #include "common_gl.h"
 #include "ShaderManager.h"
 #include "TextureManager.h"
-#include "PC_Logger.h"
+#include "BambooLib/include/Logger.h"
 #include "RenderNodes/IRenderNode.h"
 #include "RenderNodes/RenderNode_PostEffect.h"
 #include "RenderNodes/RenderNode_RenderPass.h"
@@ -29,8 +29,6 @@
 #include "Graphic.h"
 #include "Camera.h"
 
-#include "Events.h"
-#include "MainApp.h"
 
 using namespace std;
 

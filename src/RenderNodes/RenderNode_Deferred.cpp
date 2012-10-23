@@ -3,7 +3,9 @@
 #include "RenderNodes/RenderNode_SpotLight.h"
 #include "ShaderManager.h"
 #include "TextureManager.h"
-#include "PC_Logger.h"
+#include "BambooLib/include/Logger.h"
+
+using namespace BambooLib;
 
 extern int s_DebugDeferredTexture;
 extern int s_nUseParallax;
@@ -17,11 +19,15 @@ Bamboo::RN_Deferred::RN_Deferred(unsigned int nWidth, unsigned int nHeight, bool
     ItlCreateFBO();
 
     m_bLayeredFBO = bLayered;
+
+    Logger::debug() << "RN_Deferred created" << Logger::endl;
 }
 
 Bamboo::RN_Deferred::~RN_Deferred()
 {
     ItlDeleteFBO();
+
+    Logger::debug() << "RN_Deferred destroyed" << Logger::endl;
 }
 
 void Bamboo::RN_Deferred::ItlCreateFBO()
@@ -387,9 +393,6 @@ void Bamboo::RN_Deferred::ItlPreRender()
 
 void Bamboo::RN_Deferred::ItlRender()
 {
-  double test[3];
-//  glVertex3dv(test);
-
   if (m_bLayeredFBO == false)
     {
       glBindFramebuffer(GL_FRAMEBUFFER, m_nFBO);
@@ -489,12 +492,12 @@ void Bamboo::RN_Deferred::ItlRender()
     }
   else
     {
-      static bool bAlreadyPrinted = false;
+      /*static bool bAlreadyPrinted = false;
       if (bAlreadyPrinted == false)
         {
           Logger::debug() << "Texture id of cube map: " << m_nAlbedoDrawBuffer << Logger::endl;
           bAlreadyPrinted = true;
-        }
+        }*/
     }
 
 

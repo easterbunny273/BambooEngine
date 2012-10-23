@@ -2,8 +2,9 @@
 
 #include "RenderNodes/RenderNode_FBO.h"
 #include "TextureManager.h"
-#include "PC_Logger.h"
+#include "BambooLib/include/Logger.h"
 
+using namespace BambooLib;
 
 /*! \brief Constructor for creating a fbo with a color texture attached
  *
@@ -117,7 +118,7 @@ Bamboo::RN_FBO::RN_FBO(int iWidth,
     if(status != GL_FRAMEBUFFER_COMPLETE)
 	Logger::fatal() << "Failed to initialize FBO" << Logger::endl;
     else
-	Logger::debug() << "Initialized FBO" << Logger::endl;
+        Logger::debug() << "RN_FBO created, initialized FBO" << Logger::endl;
 
     //unbind framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -226,7 +227,7 @@ Bamboo::RN_FBO::RN_FBO(int iWidth,
     if(status != GL_FRAMEBUFFER_COMPLETE)
 	Logger::fatal() << "Failed to initialize FBO" << Logger::endl;
     else
-	Logger::debug() << "Initialized FBO" << Logger::endl;
+        Logger::debug() << "RN_FBO created, initialized FBO" << Logger::endl;
 
     //release used texture unit
     pTextureManager->ReleaseUnit(textureUnit);
@@ -252,6 +253,8 @@ Bamboo::RN_FBO::~RN_FBO()
 
     //finally, delete the used fbo
     glDeleteFramebuffers(1, &m_nFramebuffer);
+
+    Logger::debug() << "RN_FBO destroyed" << Logger::endl;
 }
 
 /*!

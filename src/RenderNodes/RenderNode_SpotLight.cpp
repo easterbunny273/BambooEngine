@@ -1,10 +1,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "RenderNodes/RenderNode_SpotLight.h"
-#include "PC_Logger.h"
+#include "BambooLib/include/Logger.h"
 #include "ShaderManager.h"
 #include "TextureManager.h"
 #include <iostream>
+
+using namespace BambooLib;
 
 #define NEARPLANE 0.1f
 #define FARPLANE 50.0f
@@ -37,6 +39,8 @@ Bamboo::RN_SpotLight::~RN_SpotLight()
 {
     glDeleteFramebuffers(1, &m_nFBO);
     glDeleteTextures(1, &m_nDepthTexture);
+
+    Logger::debug() << "RN_SpotLight destroyed" << Logger::endl;
 }
 
 void Bamboo::RN_SpotLight::ItlCreateVBO()
