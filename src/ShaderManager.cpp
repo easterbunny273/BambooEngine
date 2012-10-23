@@ -16,7 +16,7 @@ int last_active;
 
 //#define CHECK_FOR_GLERROR
 
-bool GraphicsCore::ShaderManager::TShader::ItlLoadFileToString(const char* szFilename, GLubyte** pszShaderSource, unsigned long* nLength)
+bool ShaderManager::TShader::ItlLoadFileToString(const char* szFilename, GLubyte** pszShaderSource, unsigned long* nLength)
 {
     ifstream file;
     file.open(szFilename, ios::in); // opens as ASCII!
@@ -66,7 +66,7 @@ bool GraphicsCore::ShaderManager::TShader::ItlLoadFileToString(const char* szFil
     return true;
 }
 
-void GraphicsCore::ShaderManager::TShader::ItlPrintShaderLog(GLuint obj)
+void ShaderManager::TShader::ItlPrintShaderLog(GLuint obj)
 {
     int iLogLength = 0;
     int iMaximalLength=0;
@@ -90,7 +90,7 @@ void GraphicsCore::ShaderManager::TShader::ItlPrintShaderLog(GLuint obj)
 }
 
 
-void GraphicsCore::ShaderManager::TShader::ItlAddShader(GLenum tShaderType, const char *szFilename)
+void ShaderManager::TShader::ItlAddShader(GLenum tShaderType, const char *szFilename)
 {
     //Logger::debug() << "Loading shader source: " << szFilename << Logger::endl;
 
@@ -129,7 +129,7 @@ void GraphicsCore::ShaderManager::TShader::ItlAddShader(GLenum tShaderType, cons
         delete[] szShaderLog;
 }
 
-void GraphicsCore::ShaderManager::TShader::ItlLinkShader()
+void ShaderManager::TShader::ItlLinkShader()
 {
     GLint iProgrammID = glCreateProgram();
 
@@ -155,7 +155,7 @@ void GraphicsCore::ShaderManager::TShader::ItlLinkShader()
     }
 }
 
-GraphicsCore::ShaderManager::TShader::TShader(const char *szVertexShaderFilename,
+ShaderManager::TShader::TShader(const char *szVertexShaderFilename,
                        const char *szTesselationControlShaderFilename,
                        const char *szTesselationEvaluationShaderFilename,
                        const char *szGeometryShaderFilename,
@@ -169,7 +169,7 @@ GraphicsCore::ShaderManager::TShader::TShader(const char *szVertexShaderFilename
     ItlLinkShader();
 }
 
-GraphicsCore::ShaderManager::TShader::TShader(const char *szVertexShaderFilename,
+ShaderManager::TShader::TShader(const char *szVertexShaderFilename,
                        const char *szTesselationControlShaderFilename,
                        const char *szTesselationEvaluationShaderFilename,
                        const char *szFragmentShaderFilename)
@@ -181,7 +181,7 @@ GraphicsCore::ShaderManager::TShader::TShader(const char *szVertexShaderFilename
     ItlLinkShader();
 }
 
-GraphicsCore::ShaderManager::TShader::TShader(const char *szVertexShaderFilename,
+ShaderManager::TShader::TShader(const char *szVertexShaderFilename,
                const char *szFragmentShaderFilename)
     : m_bReadyForUse(false)
 {
@@ -190,7 +190,7 @@ GraphicsCore::ShaderManager::TShader::TShader(const char *szVertexShaderFilename
     ItlLinkShader();
 }
 
-GraphicsCore::ShaderManager::TShader::TShader(const char *szVertexShaderFilename,
+ShaderManager::TShader::TShader(const char *szVertexShaderFilename,
                const char *szGeometryShaderFilename,
                const char *szFragmentShaderFilename)
     : m_bReadyForUse(false)
@@ -202,7 +202,7 @@ GraphicsCore::ShaderManager::TShader::TShader(const char *szVertexShaderFilename
 }
 
 
-GraphicsCore::ShaderManager::TShader::~TShader()
+ShaderManager::TShader::~TShader()
 {
     //delete shader program
     glDeleteProgram(m_nShaderId);
@@ -211,7 +211,7 @@ GraphicsCore::ShaderManager::TShader::~TShader()
     for_each(m_glShaderObjects.begin(), m_glShaderObjects.end(), [](GLuint shader) { glDeleteShader(shader); });
 }
 
-void GraphicsCore::ShaderManager::TShader::Activate()
+void ShaderManager::TShader::Activate()
 {
     //activate shader if it is ready for use, else log an error message
 
@@ -235,7 +235,7 @@ void GraphicsCore::ShaderManager::TShader::Activate()
     Logger::error() << "Could not activate shader because it is not ready for use" << Logger::endl;
 }
 
-GLint GraphicsCore::ShaderManager::TShader::GetUniformLocation(const char *szName)
+GLint ShaderManager::TShader::GetUniformLocation(const char *szName)
 {
     std::string sName(szName);
 
@@ -259,7 +259,7 @@ GLint GraphicsCore::ShaderManager::TShader::GetUniformLocation(const char *szNam
     return iLocation;
 }
 
-GLint GraphicsCore::ShaderManager::TShader::GetAttribLocation(const char *szName)
+GLint ShaderManager::TShader::GetAttribLocation(const char *szName)
 {
     if (static_cast<GLuint>(last_active) != m_nShaderId)
     Logger::error() << "While setting an attribute of an shader, the shader must be active!" << Logger::endl;
@@ -283,26 +283,26 @@ GLint GraphicsCore::ShaderManager::TShader::GetAttribLocation(const char *szName
     return iLocation;
 }
 
-GraphicsCore::ShaderManager::ShaderManager()
+ShaderManager::ShaderManager()
 {
     //nothing to do so far
     m_nCurrentActiveShaderProgram = 0;
 }
 
-GraphicsCore::ShaderManager::~ShaderManager()
+ShaderManager::~ShaderManager()
 {
     // destroy all used Shader instances
     // C++11 construct with lambda function :)
     for_each(m_vpShaders.begin(), m_vpShaders.end(), [](TShader *pShader) { delete pShader; });
 }
 
-void GraphicsCore::ShaderManager::AddShader(std::string sName, TShader *pShader)
+void ShaderManager::AddShader(std::string sName, TShader *pShader)
 {
     m_vpShaders.push_back(pShader);
     m_vsShaderNames.push_back(sName);
 }
 
-bool GraphicsCore::ShaderManager::ActivateShader(std::string sName)
+bool ShaderManager::ActivateShader(std::string sName)
 {
     bool bSuccess = false;
 
@@ -327,22 +327,22 @@ bool GraphicsCore::ShaderManager::ActivateShader(std::string sName)
     return bSuccess;
 }
 
-GLint GraphicsCore::ShaderManager::GetAttribute(std::string sAttributeName)
+GLint ShaderManager::GetAttribute(std::string sAttributeName)
 {
     return m_vpShaders[m_nCurrentActiveShaderProgram]->GetAttribLocation(sAttributeName.data());
 }
 
-GLint GraphicsCore::ShaderManager::GetUniform(std::string sUniformName)
+GLint ShaderManager::GetUniform(std::string sUniformName)
 {
     return m_vpShaders[m_nCurrentActiveShaderProgram]->GetUniformLocation(sUniformName.data());
 }
 
-void GraphicsCore::ShaderManager::PushActiveShader()
+void ShaderManager::PushActiveShader()
 {
     m_vActiveShaderStack.push(m_nCurrentActiveShaderProgram);
 }
 
-void GraphicsCore::ShaderManager::PopActiveShader()
+void ShaderManager::PopActiveShader()
 {
     unsigned int nOldActiveShader = m_nCurrentActiveShaderProgram;
 

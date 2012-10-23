@@ -32,13 +32,14 @@ namespace BambooGraphics
     class SceneObject_RenderTarget;
     class INodeTranslator;
 
+    class ShaderManager;
 
     class GraphicsCore
     {
     public:
         /*! \name Internal classes, forward declarations */
         //@{
-            class ShaderManager;
+
             class TextureManager;
 
             class IRenderNode;

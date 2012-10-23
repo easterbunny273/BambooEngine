@@ -94,7 +94,7 @@ void GraphicsCore::Render()
 
 /****************************************************************
   *************************************************************** */
-GraphicsCore::ShaderManager * GraphicsCore::GetShaderManager()
+ShaderManager * GraphicsCore::GetShaderManager()
 {
     assert (m_pShaderManager != NULL);
 
@@ -127,10 +127,10 @@ int GraphicsCore::AddRenderLoop(std::shared_ptr<IRenderTarget> spRenderTarget,
     m_mRenderLoops[iID++] = NewLoop;
 
     // load shader, if not loaded
-    GetShaderManager()->AddShader("posteffect1", new GraphicsCore::ShaderManager::TShader("BambooEngine/shaders/posteffect1.vs", "BambooEngine/shaders/posteffect1.fs"));
-    GetShaderManager()->AddShader("directwrite", new GraphicsCore::ShaderManager::TShader("BambooEngine/shaders/directwrite.vs", "BambooEngine/shaders/directwrite.fs"));
-    GetShaderManager()->AddShader("light-pass", new GraphicsCore::ShaderManager::TShader("BambooEngine/shaders/light_pass.vs", "BambooEngine/shaders/light_pass.fs"));
-    GetShaderManager()->AddShader("camera-debug2", new GraphicsCore::ShaderManager::TShader("BambooEngine/shaders/camera-debug2.vs", "BambooEngine/shaders/camera-debug2.fs"));
+    GetShaderManager()->AddShader("posteffect1", new ShaderManager::TShader("BambooEngine/shaders/posteffect1.vs", "BambooEngine/shaders/posteffect1.fs"));
+    GetShaderManager()->AddShader("directwrite", new ShaderManager::TShader("BambooEngine/shaders/directwrite.vs", "BambooEngine/shaders/directwrite.fs"));
+    GetShaderManager()->AddShader("light-pass", new ShaderManager::TShader("BambooEngine/shaders/light_pass.vs", "BambooEngine/shaders/light_pass.fs"));
+    GetShaderManager()->AddShader("camera-debug2", new ShaderManager::TShader("BambooEngine/shaders/camera-debug2.vs", "BambooEngine/shaders/camera-debug2.fs"));
     GetTextureManager()->LoadTexture("spotlight", "textures/spot.png", false);
 
     return iID;

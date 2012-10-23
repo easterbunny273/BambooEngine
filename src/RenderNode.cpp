@@ -21,7 +21,7 @@ void GraphicsCore::IRenderNode::ItlSendTransformMatrices()
     GraphicsCore *pGraphicCore = ItlGetGraphicCore();
     assert (pGraphicCore != NULL);
 
-    GraphicsCore::ShaderManager *pShaderManager = pGraphicCore->GetShaderManager();
+    ShaderManager *pShaderManager = pGraphicCore->GetShaderManager();
     assert (pShaderManager != NULL);
 
     //first, get the positions

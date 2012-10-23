@@ -3,19 +3,19 @@
  * written by: christian moellinger <ch.moellinger@gmail.com>
  * 10/2010, Project "BambooIsland"
  * 03/2011, Project "Free Pool"
+ * 10/2012, Project "BambooGraphics"
  */
 
 #pragma once
 
-#ifndef __realtime_lu_shadermanager_class
-#define __realtime_lu_shadermanager_class
+#ifndef __BAMBOOGRAPHICS_SHADERMANAGER_H
+#define __BAMBOOGRAPHICS_SHADERMANAGER_H
 
 #include <vector>
 #include <string>
 #include <stack>
 #include "common_gl.h"
 #include "Graphic.h"
-#include "Shader.h"
 
 namespace BambooGraphics
 {
@@ -28,10 +28,8 @@ namespace BambooGraphics
       which can be used for things like enforcing a simple shader program when rendering the shadowmap or reflected objects.
     */
 
-    class GraphicsCore::ShaderManager
+    class ShaderManager
     {
-        friend class GraphicsCore;
-
     public:
         /*! \name Public classes */
         //@{
@@ -102,6 +100,15 @@ namespace BambooGraphics
         };
         //@}
 
+        /*! \name Constructor / Destructor */
+        //@{
+        /// Constructor, private because the class is designed as a Singelton
+        ShaderManager();
+
+        /// Destructor, destroys all used shaders programs
+        ~ShaderManager();
+        //@}
+
         /*! \name Public methods */
         //@{
         /// adds a shader program to the manager, from now on the shader can be activated with activateShader(name),
@@ -128,18 +135,9 @@ namespace BambooGraphics
         //@}
 
     private:
-        /*! \name Constructor / Destructor */
-        //@{
-        /// Constructor, private because the class is designed as a Singelton
-        ShaderManager();
-
-        /// Destructor, destroys all used shaders programs
-        ~ShaderManager();
-        //@}
-
         /*! \name Private members */
         //@{
-        unsigned int			m_nCurrentActiveShaderProgram;	    ///< The id of the currently active shader
+        unsigned int                m_nCurrentActiveShaderProgram;	    ///< The id of the currently active shader
 
         std::vector<TShader *>		m_vpShaders;			///< the shader instances
         std::vector<std::string>	m_vsShaderNames;		///< the name for the shader instances
@@ -148,4 +146,4 @@ namespace BambooGraphics
     };
 };
 
-#endif
+#endif //__BAMBOOGRAPHICS_SHADERMANAGER_H
