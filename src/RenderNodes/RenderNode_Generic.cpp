@@ -346,9 +346,11 @@ void GraphicsCore::RN_Generic::ItlLoadShader()
 
     if (bAlreadyLoaded == false)
     {
-      ItlGetGraphicCore()->GetShaderManager()->AddShader("deferred_pass", new ShaderManager::TShader("BambooEngine/shaders/deferred_pass.vert", "BambooEngine/shaders/deferred_pass.frag"));
-      ItlGetGraphicCore()->GetShaderManager()->AddShader("deferred_pass_cm", new ShaderManager::TShader("BambooEngine/shaders/deferred_pass_cm.vert", "BambooEngine/shaders/deferred_pass_cm.geom", "BambooEngine/shaders/deferred_pass_cm.frag"));
+      //ItlGetGraphicCore()->GetShaderManager()->AddShader("deferred_pass", new ShaderManager::TShader("BambooEngine/shaders/deferred_pass.vert", "BambooEngine/shaders/deferred_pass.frag"));
+      //ItlGetGraphicCore()->GetShaderManager()->AddShader("deferred_pass_cm", new ShaderManager::TShader("BambooEngine/shaders/deferred_pass_cm.vert", "BambooEngine/shaders/deferred_pass_cm.geom", "BambooEngine/shaders/deferred_pass_cm.frag"));
 
+      ItlGetGraphicCore()->GetShaderManager()->CreateAndRegisterShader("deferred_pass", "BambooEngine/shaders/deferred_pass.vert", "BambooEngine/shaders/deferred_pass.frag");
+      ItlGetGraphicCore()->GetShaderManager()->CreateAndRegisterShader("deferred_pass_cm", "BambooEngine/shaders/deferred_pass_cm.vert", "BambooEngine/shaders/deferred_pass_cm.geom", "BambooEngine/shaders/deferred_pass_cm.frag");
       bAlreadyLoaded = true;
 
       GLenum error = glGetError();

@@ -16,224 +16,7 @@ int last_active;
 
 //#define CHECK_FOR_GLERROR
 
-bool ShaderManager::TShader::ItlLoadFileToString(const char* szFilename, GLubyte** pszShaderSource, unsigned long* nLength)
-{
-    ifstream file;
-    file.open(szFilename, ios::in); // opens as ASCII!
-
-    if(!file || !file.good())
-    {
-        Logger::fatal() << "Could not read shader source code from " << szFilename << Logger::endl;
-
-    return false;
-    }
-
-    //unsigned long pos=file.tellg();
-    file.seekg(0,ios::end);
-    *nLength = file.tellg();
-    file.seekg(ios::beg);
-
-    if (*nLength==0)
-    {
-        Logger::fatal() << "Could not read shader source code from " << szFilename << " (File was empty)" << Logger::endl;
-    return false;
-    }
-
-    *pszShaderSource = (GLubyte*) new GLubyte[(*nLength)+1];
-
-    if (*pszShaderSource == 0)
-    {
-        Logger::fatal() << "Could not reserve memory for shader source code (reading " << szFilename << ")" << Logger::endl;
-    return false;
-    }
-
-    // len isn't always strlen cause some characters are stripped in ascii read...
-    // it is important to 0-terminate the real length later, len is just max possible value...
-    (*pszShaderSource)[*nLength] = 0;
-
-    unsigned int nPos=0;
-    while (file.good())
-    {
-       (*pszShaderSource)[nPos] = file.get();       // get character from file.
-       if (!file.eof())
-        nPos++;
-    }
-
-    (*pszShaderSource)[nPos] = 0;  // 0-terminate it at the correct position
-
-    file.close();
-
-    return true;
-}
-
-void ShaderManager::TShader::ItlPrintShaderLog(GLuint obj)
-{
-    int iLogLength = 0;
-    int iMaximalLength=0;
-
-    if(glIsShader(obj))
-            glGetShaderiv(obj,GL_INFO_LOG_LENGTH,&iMaximalLength);
-    else
-            glGetProgramiv(obj,GL_INFO_LOG_LENGTH,&iMaximalLength);
-
-    char *szInfoLog = new char[iMaximalLength];
-
-    if (glIsShader(obj))
-            glGetShaderInfoLog(obj, iMaximalLength, &iLogLength, szInfoLog);
-    else
-            glGetProgramInfoLog(obj, iMaximalLength, &iLogLength, szInfoLog);
-
-    if (iLogLength > 1)
-        Logger::error() << "Shader messages: \n" << szInfoLog << Logger::endl;
-
-    delete[] szInfoLog;
-}
-
-
-void ShaderManager::TShader::ItlAddShader(GLenum tShaderType, const char *szFilename)
-{
-    //Logger::debug() << "Loading shader source: " << szFilename << Logger::endl;
-
-    GLubyte *szShaderLog = 0;
-    unsigned long int nShaderLength;
-
-    bool source_ok = false;
-
-    source_ok = ItlLoadFileToString(szFilename, &szShaderLog, &nShaderLength);
-
-    assert (source_ok);
-
-    GLuint nShaderID = glCreateShader(tShaderType);
-
-    glShaderSource(nShaderID, 1,  (const GLchar **) &szShaderLog, (const GLint *) &nShaderLength);
-
-    glCompileShader(nShaderID);
-
-    //lets see if an error happened
-    GLint iCompileStatus;
-
-    //check vertex shader object
-    glGetShaderiv(nShaderID, GL_COMPILE_STATUS, &iCompileStatus);
-    if (!iCompileStatus)
-    {
-        ItlPrintShaderLog(nShaderID);
-    Logger::fatal() << "Could not compile shader " << szFilename << Logger::endl;
-    }
-    else
-    {
-    Logger::debug() << "Successfully compiled shader " << szFilename << Logger::endl;
-        m_glShaderObjects.push_back(nShaderID);
-    }
-
-    if (szShaderLog != 0)
-        delete[] szShaderLog;
-}
-
-void ShaderManager::TShader::ItlLinkShader()
-{
-    GLint iProgrammID = glCreateProgram();
-
-    for (unsigned int i=0; i < m_glShaderObjects.size(); i++)
-        glAttachShader(iProgrammID, m_glShaderObjects.at(i));
-
-    glLinkProgram(iProgrammID);
-
-    GLint iLinkStatus;
-    glGetProgramiv(iProgrammID, GL_LINK_STATUS, &iLinkStatus);
-
-    if (!iLinkStatus)
-    {
-       ItlPrintShaderLog(iProgrammID);
-       Logger::fatal() << "Could not link shader program" << Logger::endl;
-    }
-    else
-    {
-            m_nShaderId = iProgrammID;
-            m_bReadyForUse = true;
-
-        Logger::debug() << "Successfully linked shader program" << Logger::endl;
-    }
-}
-
-ShaderManager::TShader::TShader(const char *szVertexShaderFilename,
-                       const char *szTesselationControlShaderFilename,
-                       const char *szTesselationEvaluationShaderFilename,
-                       const char *szGeometryShaderFilename,
-                       const char *szFragmentShaderFilename)
-{
-    ItlAddShader(GL_VERTEX_SHADER, szVertexShaderFilename);
-    ItlAddShader(GL_TESS_CONTROL_SHADER, szTesselationControlShaderFilename);
-    ItlAddShader(GL_TESS_EVALUATION_SHADER, szTesselationEvaluationShaderFilename);
-    ItlAddShader(GL_GEOMETRY_SHADER, szGeometryShaderFilename);
-    ItlAddShader(GL_FRAGMENT_SHADER, szFragmentShaderFilename);
-    ItlLinkShader();
-}
-
-ShaderManager::TShader::TShader(const char *szVertexShaderFilename,
-                       const char *szTesselationControlShaderFilename,
-                       const char *szTesselationEvaluationShaderFilename,
-                       const char *szFragmentShaderFilename)
-{
-    ItlAddShader(GL_VERTEX_SHADER, szVertexShaderFilename);
-    ItlAddShader(GL_TESS_CONTROL_SHADER, szTesselationControlShaderFilename);
-    ItlAddShader(GL_TESS_EVALUATION_SHADER, szTesselationEvaluationShaderFilename);
-    ItlAddShader(GL_FRAGMENT_SHADER, szFragmentShaderFilename);
-    ItlLinkShader();
-}
-
-ShaderManager::TShader::TShader(const char *szVertexShaderFilename,
-               const char *szFragmentShaderFilename)
-    : m_bReadyForUse(false)
-{
-    ItlAddShader(GL_VERTEX_SHADER, szVertexShaderFilename);
-    ItlAddShader(GL_FRAGMENT_SHADER, szFragmentShaderFilename);
-    ItlLinkShader();
-}
-
-ShaderManager::TShader::TShader(const char *szVertexShaderFilename,
-               const char *szGeometryShaderFilename,
-               const char *szFragmentShaderFilename)
-    : m_bReadyForUse(false)
-{
-    ItlAddShader(GL_VERTEX_SHADER, szVertexShaderFilename);
-    ItlAddShader(GL_GEOMETRY_SHADER, szGeometryShaderFilename);
-    ItlAddShader(GL_FRAGMENT_SHADER, szFragmentShaderFilename);
-    ItlLinkShader();
-}
-
-
-ShaderManager::TShader::~TShader()
-{
-    //delete shader program
-    glDeleteProgram(m_nShaderId);
-
-    //delete shader parts
-    for_each(m_glShaderObjects.begin(), m_glShaderObjects.end(), [](GLuint shader) { glDeleteShader(shader); });
-}
-
-void ShaderManager::TShader::Activate()
-{
-    //activate shader if it is ready for use, else log an error message
-
-    if (m_bReadyForUse)
-    {
-#ifdef CHECK_FOR_GLERROR
-    glGetError();
-#endif
-
-    glUseProgram(m_nShaderId);
-
-#ifdef CHECK_FOR_GLERROR
-    GLenum error = glGetError();
-    if (error != GL_NO_ERROR)
-        Logger::error() << "glGetError(): " << TranslateGLerror(error) << Logger::endl;
-#endif
-
-    last_active = m_nShaderId;
-    }
-    else
-    Logger::error() << "Could not activate shader because it is not ready for use" << Logger::endl;
-}
+/*
 
 GLint ShaderManager::TShader::GetUniformLocation(const char *szName)
 {
@@ -281,77 +64,448 @@ GLint ShaderManager::TShader::GetAttribLocation(const char *szName)
     }
 
     return iLocation;
-}
+}*/
 
 ShaderManager::ShaderManager()
 {
-    //nothing to do so far
-    m_nCurrentActiveShaderProgram = 0;
+    m_pCurrentActiveShader = NULL;
 }
 
 ShaderManager::~ShaderManager()
 {
-    // destroy all used Shader instances
-    // C++11 construct with lambda function :)
-    for_each(m_vpShaders.begin(), m_vpShaders.end(), [](TShader *pShader) { delete pShader; });
+
 }
 
-void ShaderManager::AddShader(std::string sName, TShader *pShader)
+bool ShaderManager::CreateAndRegisterShader(const std::string sName,
+                                            const std::string sVertexShaderFilename,
+                                            const std::string sFragmentShaderFilename)
 {
-    m_vpShaders.push_back(pShader);
-    m_vsShaderNames.push_back(sName);
+    std::vector<GLuint> vCompiledShaderObjects;
+
+    GLuint iNewCompiledShaderObject;
+    bool bOk = ItlLoadAndCompileShader(GL_VERTEX_SHADER, sVertexShaderFilename, iNewCompiledShaderObject);
+
+    if (bOk)
+        vCompiledShaderObjects.push_back(iNewCompiledShaderObject);
+
+    bOk &= ItlLoadAndCompileShader(GL_FRAGMENT_SHADER, sFragmentShaderFilename, iNewCompiledShaderObject);
+
+    if (bOk)
+        vCompiledShaderObjects.push_back(iNewCompiledShaderObject);
+
+    if (bOk)
+    {
+        GLuint iNewShaderProgram;
+        bOk &= ItlLinkShaderProgram(vCompiledShaderObjects, iNewShaderProgram);
+
+        if (bOk)
+        {
+            // create new shader program
+            TItlShader *pNewShaderProgram = new TItlShader(iNewShaderProgram, vCompiledShaderObjects);
+
+            // check that shader program with that name is not registered yet
+            assert (m_mpShaders.find(sName) == m_mpShaders.end());
+
+            // insert into map
+            m_mpShaders[sName] = pNewShaderProgram;
+        }
+    }
+
+    return bOk;
+}
+
+bool ShaderManager::CreateAndRegisterShader(const std::string sName,
+                                            const std::string sVertexShaderFilename,
+                                            const std::string sGeometryShaderFilename,
+                                            const std::string sFragmentShaderFilename)
+{
+    std::vector<GLuint> vCompiledShaderObjects;
+
+    GLuint iNewCompiledShaderObject;
+    bool bOk = ItlLoadAndCompileShader(GL_VERTEX_SHADER, sVertexShaderFilename, iNewCompiledShaderObject);
+
+    if (bOk)
+        vCompiledShaderObjects.push_back(iNewCompiledShaderObject);
+
+    bOk &= ItlLoadAndCompileShader(GL_GEOMETRY_SHADER, sGeometryShaderFilename, iNewCompiledShaderObject);
+
+    if (bOk)
+        vCompiledShaderObjects.push_back(iNewCompiledShaderObject);
+
+    bOk &= ItlLoadAndCompileShader(GL_FRAGMENT_SHADER, sFragmentShaderFilename, iNewCompiledShaderObject);
+
+    if (bOk)
+        vCompiledShaderObjects.push_back(iNewCompiledShaderObject);
+
+    if (bOk)
+    {
+        GLuint iNewShaderProgram;
+        bOk &= ItlLinkShaderProgram(vCompiledShaderObjects, iNewShaderProgram);
+
+        if (bOk)
+        {
+            // create new shader program
+            TItlShader *pNewShaderProgram = new TItlShader(iNewShaderProgram, vCompiledShaderObjects);
+
+            // check that shader program with that name is not registered yet
+            assert (m_mpShaders.find(sName) == m_mpShaders.end());
+
+            // insert into map
+            m_mpShaders[sName] = pNewShaderProgram;
+        }
+    }
+
+    return bOk;
+}
+
+bool ShaderManager::CreateAndRegisterShader(const std::string sName,
+                                            const std::string sVertexShaderFilename,
+                                            const std::string sTesselationControlShaderFilename,
+                                            const std::string sTesselationEvaluationShaderFilename,
+                                            const std::string sFragmentShaderFilename)
+{
+    std::vector<GLuint> vCompiledShaderObjects;
+
+    GLuint iNewCompiledShaderObject;
+    bool bOk = ItlLoadAndCompileShader(GL_VERTEX_SHADER, sVertexShaderFilename, iNewCompiledShaderObject);
+
+    if (bOk)
+        vCompiledShaderObjects.push_back(iNewCompiledShaderObject);
+
+    bOk &= ItlLoadAndCompileShader(GL_TESS_CONTROL_SHADER, sTesselationControlShaderFilename, iNewCompiledShaderObject);
+
+    if (bOk)
+        vCompiledShaderObjects.push_back(iNewCompiledShaderObject);
+
+    bOk &= ItlLoadAndCompileShader(GL_TESS_EVALUATION_SHADER, sTesselationEvaluationShaderFilename, iNewCompiledShaderObject);
+
+    if (bOk)
+        vCompiledShaderObjects.push_back(iNewCompiledShaderObject);
+
+    bOk &= ItlLoadAndCompileShader(GL_FRAGMENT_SHADER, sFragmentShaderFilename, iNewCompiledShaderObject);
+
+    if (bOk)
+        vCompiledShaderObjects.push_back(iNewCompiledShaderObject);
+
+    if (bOk)
+    {
+        GLuint iNewShaderProgram;
+        bOk &= ItlLinkShaderProgram(vCompiledShaderObjects, iNewShaderProgram);
+
+        if (bOk)
+        {
+            // create new shader program
+            TItlShader *pNewShaderProgram = new TItlShader(iNewShaderProgram, vCompiledShaderObjects);
+
+            // check that shader program with that name is not registered yet
+            assert (m_mpShaders.find(sName) == m_mpShaders.end());
+
+            // insert into map
+            m_mpShaders[sName] = pNewShaderProgram;
+        }
+    }
+
+    return bOk;
+}
+
+bool ShaderManager::CreateAndRegisterShader(const std::string sName,
+                                            const std::string sVertexShaderFilename,
+                                            const std::string sTesselationControlShaderFilename,
+                                            const std::string sTesselationEvaluationShaderFilename,
+                                            const std::string sGeometryShaderFilename,
+                                            const std::string sFragmentShaderFilename)
+{
+    std::vector<GLuint> vCompiledShaderObjects;
+
+    GLuint iNewCompiledShaderObject;
+    bool bOk = ItlLoadAndCompileShader(GL_VERTEX_SHADER, sVertexShaderFilename, iNewCompiledShaderObject);
+
+    if (bOk)
+        vCompiledShaderObjects.push_back(iNewCompiledShaderObject);
+
+    bOk &= ItlLoadAndCompileShader(GL_TESS_CONTROL_SHADER, sTesselationControlShaderFilename, iNewCompiledShaderObject);
+
+    if (bOk)
+        vCompiledShaderObjects.push_back(iNewCompiledShaderObject);
+
+    bOk &= ItlLoadAndCompileShader(GL_TESS_EVALUATION_SHADER, sTesselationEvaluationShaderFilename, iNewCompiledShaderObject);
+
+    if (bOk)
+        vCompiledShaderObjects.push_back(iNewCompiledShaderObject);
+
+    bOk &= ItlLoadAndCompileShader(GL_GEOMETRY_SHADER, sGeometryShaderFilename, iNewCompiledShaderObject);
+
+    if (bOk)
+        vCompiledShaderObjects.push_back(iNewCompiledShaderObject);
+
+    bOk &= ItlLoadAndCompileShader(GL_FRAGMENT_SHADER, sFragmentShaderFilename, iNewCompiledShaderObject);
+
+    if (bOk)
+        vCompiledShaderObjects.push_back(iNewCompiledShaderObject);
+
+    if (bOk)
+    {
+        GLuint iNewShaderProgram;
+        bOk &= ItlLinkShaderProgram(vCompiledShaderObjects, iNewShaderProgram);
+
+        if (bOk)
+        {
+            // create new shader program
+            TItlShader *pNewShaderProgram = new TItlShader(iNewShaderProgram, vCompiledShaderObjects);
+
+            // check that shader program with that name is not registered yet
+            assert (m_mpShaders.find(sName) == m_mpShaders.end());
+
+            // insert into map
+            m_mpShaders[sName] = pNewShaderProgram;
+        }
+    }
+
+    return bOk;
 }
 
 bool ShaderManager::ActivateShader(std::string sName)
 {
-    bool bSuccess = false;
+    auto iterToShader = m_mpShaders.find(sName);
 
-    for (unsigned int a=0; a < m_vpShaders.size(); a++)
-    {
-    if (m_vsShaderNames[a].compare(sName)==0)
-    {
-            if (m_nCurrentActiveShaderProgram != a)
-            {
-                m_vpShaders[a]->Activate();
-                m_nCurrentActiveShaderProgram = a;
-            }
+    bool bShaderFound = (iterToShader != m_mpShaders.end());
 
-            bSuccess = true;
-            break;
+    if (bShaderFound)
+    {
+        m_pCurrentActiveShader = (*iterToShader).second;
+
+        glUseProgram((*iterToShader).second->nGLShaderName);
     }
+    else
+    {
+        Logger::fatal() << "Could not activate shader with internal name \"" << sName  << "\", because it is not registered in ShaderManager" << Logger::endl;
     }
 
-    if (bSuccess == false)
-    Logger::error() << "Could not activate shader with internal name \"" << sName  << "\", because it is not registered in ShaderManager" << Logger::endl;
-
-    return bSuccess;
+    return bShaderFound;
 }
 
 GLint ShaderManager::GetAttribute(std::string sAttributeName)
 {
-    return m_vpShaders[m_nCurrentActiveShaderProgram]->GetAttribLocation(sAttributeName.data());
+    GLint iLocation = -1;
+
+    TItlShader *pCurrentActiveShader = m_pCurrentActiveShader;
+
+    if (pCurrentActiveShader != NULL)
+    {
+        assert (glIsProgram(pCurrentActiveShader->nGLShaderName));
+
+        auto iterUniformLocation = pCurrentActiveShader->mCachedAttributeLocations.find(sAttributeName);
+
+        bool bUniformLocationCached =  (iterUniformLocation != pCurrentActiveShader->mCachedAttributeLocations.end());
+
+        if (bUniformLocationCached)
+        {
+            iLocation = (*iterUniformLocation).second;
+        }
+        else
+        {
+            iLocation = glGetAttribLocation(pCurrentActiveShader->nGLShaderName, sAttributeName.c_str());
+           // pCurrentActiveShader->mCachedAttributeLocations[sAttributeName] = iLocation;
+        }
+    }
+
+    GLenum error = glGetError();
+
+    if (error != GL_NO_ERROR)
+        Logger::error() << "glGetError(): " << TranslateGLerror(error) << Logger::endl;
+
+    //assert (pCurrentActiveShader != NULL);
+
+    return iLocation;
 }
 
 GLint ShaderManager::GetUniform(std::string sUniformName)
 {
-    return m_vpShaders[m_nCurrentActiveShaderProgram]->GetUniformLocation(sUniformName.data());
+    GLint iLocation = -1;
+
+    TItlShader *pCurrentActiveShader = m_pCurrentActiveShader;
+
+    if (pCurrentActiveShader != NULL)
+    {
+        auto iterUniformLocation = pCurrentActiveShader->mCachedUniformLocations.find(sUniformName);
+
+        bool bUniformLocationCached =  (iterUniformLocation != pCurrentActiveShader->mCachedUniformLocations.end());
+
+        if (bUniformLocationCached)
+        {
+            iLocation = (*iterUniformLocation).second;
+        }
+        else
+        {
+            iLocation = glGetUniformLocation(pCurrentActiveShader->nGLShaderName, sUniformName.c_str());
+           // pCurrentActiveShader->mCachedUniformLocations[sUniformName] = iLocation;
+        }
+    }
+
+
+
+    return iLocation;
 }
 
 void ShaderManager::PushActiveShader()
 {
-    m_vActiveShaderStack.push(m_nCurrentActiveShaderProgram);
+    m_vpActiveShaderStack.push(m_pCurrentActiveShader);
+    //m_vActiveShaderStack.push(m_nCurrentActiveShaderProgram);
 }
 
 void ShaderManager::PopActiveShader()
 {
-    unsigned int nOldActiveShader = m_nCurrentActiveShaderProgram;
+    m_pCurrentActiveShader = m_vpActiveShaderStack.top();
 
-    m_nCurrentActiveShaderProgram = m_vActiveShaderStack.top();
+    m_vpActiveShaderStack.pop();
 
-    m_vActiveShaderStack.pop();
+    if (m_pCurrentActiveShader != NULL)
+        glUseProgram(m_pCurrentActiveShader->nGLShaderName);
+    else
+        glUseProgram(0);
+}
 
-    if (m_nCurrentActiveShaderProgram != nOldActiveShader)
-        m_vpShaders[m_nCurrentActiveShaderProgram]->Activate();
+bool ShaderManager::ItlLinkShaderProgram(std::vector<GLuint> vShaders, GLuint &rnResultingShaderProgram)
+{
+    // create new shader program
+    GLint iNewShaderProgram = glCreateProgram();
+
+    // attach the compiled shader objects
+    for (auto iter = vShaders.begin(); iter != vShaders.end(); iter++)
+        glAttachShader(iNewShaderProgram, *iter);
+
+    // link shader program
+    glLinkProgram(iNewShaderProgram);
+
+    // query link status
+    GLint iLinkStatus;
+    glGetProgramiv(iNewShaderProgram, GL_LINK_STATUS, &iLinkStatus);
+
+    bool bOk = (iLinkStatus == GL_TRUE);
+
+    if (!bOk)
+    {
+       ItlPrintShaderLog(iNewShaderProgram);
+       Logger::fatal() << "Could not link shader program" << Logger::endl;
+
+       glDeleteProgram(iNewShaderProgram);
+    }
+    else
+    {
+        rnResultingShaderProgram = iNewShaderProgram;
+
+        Logger::debug() << "Sucessfully linked shader program" << Logger::endl;
+    }
+
+    return bOk;
+}
+
+void ShaderManager::ItlPrintShaderLog(GLuint nGLShaderOrShaderProgram)
+{
+    int iLogLength = 0;
+    int iMaximalLength=0;
+
+    if(glIsShader(nGLShaderOrShaderProgram))
+            glGetShaderiv(nGLShaderOrShaderProgram, GL_INFO_LOG_LENGTH,&iMaximalLength);
+    else
+            glGetProgramiv(nGLShaderOrShaderProgram, GL_INFO_LOG_LENGTH,&iMaximalLength);
+
+    char *szInfoLog = new char[iMaximalLength];
+
+    if (glIsShader(nGLShaderOrShaderProgram))
+            glGetShaderInfoLog(nGLShaderOrShaderProgram, iMaximalLength, &iLogLength, szInfoLog);
+    else
+            glGetProgramInfoLog(nGLShaderOrShaderProgram, iMaximalLength, &iLogLength, szInfoLog);
+
+    if (iLogLength > 1)
+        Logger::error() << "Shader messages: \n" << szInfoLog << Logger::endl;
+
+    delete[] szInfoLog;
+}
+
+bool ShaderManager::ItlLoadAndCompileShader(GLenum eShader,
+                                            const string sFilename,
+                                            GLuint &rnCreatedShaderObject)
+{
+    std::vector<char> vcSource;
+    bool bOk = ItlLoadSourceFromFile(sFilename, vcSource);
+
+    if (bOk)
+    {
+        // create shader object
+        GLuint nShaderID = glCreateShader(eShader);
+
+        GLint iSourceLength = vcSource.size();
+
+        const GLchar * szSource = &vcSource[0];
+
+        // set shader source
+        glShaderSource(nShaderID, 1,  (const GLchar **) &szSource, (const GLint *) &iSourceLength);
+
+        // try to compile
+        glCompileShader(nShaderID);
+
+        // check result
+        GLint iCompileStatus;
+        glGetShaderiv(nShaderID, GL_COMPILE_STATUS, &iCompileStatus);
+
+        bOk = (iCompileStatus == GL_TRUE);
+
+        if (!bOk)
+        {
+            ItlPrintShaderLog(nShaderID);
+            Logger::fatal() << "Could not compile shader " << sFilename << Logger::endl;
+        }
+        else
+        {
+            rnCreatedShaderObject = nShaderID;
+
+            Logger::debug() << "Successfully compiled shader " << sFilename << Logger::endl;
+        }
+    }
+
+    return bOk;
+}
+
+bool ShaderManager::ItlLoadSourceFromFile(std::string sFilename, std::vector<char> &rvcSource)
+{
+    // create input file stream
+    ifstream InputFile(sFilename);
+
+    // check if file is opened correctly
+    bool bOk = InputFile.is_open();
+    assert (bOk);
+
+    // read file in one call
+    if (bOk)
+    {
+        // seek to end
+        InputFile.seekg(0, ios::end);
+
+        // get position (=size)
+        long lSize = InputFile.tellg();
+
+        // seek to begin
+        InputFile.seekg(ios::beg);
+
+        // create buffer to read data content
+        char *pBuffer = new char[lSize];
+
+        // read content
+        InputFile.read(pBuffer, lSize);
+
+        // reserve space in dest-vector
+        rvcSource.reserve(lSize);
+
+        // clear dest vector
+        rvcSource.clear();
+
+        // copy content (todo: memcpy for faster acccess?)
+        for (long i=0; i < lSize; i++)
+            rvcSource.push_back(pBuffer[i]);
+    }
+
+    return bOk;
 }
 
 }
