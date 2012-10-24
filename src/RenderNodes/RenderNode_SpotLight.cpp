@@ -173,8 +173,7 @@ void GraphicsCore::RN_SpotLight::ItlPrepareVAO()
   ShaderManager *pShaderManager = ItlGetGraphicCore()->GetShaderManager();
 
   // set "our" shader
-  pShaderManager->PushActiveShader();
-  pShaderManager->ActivateShader("light-pass");
+  pShaderManager->PushActiveShader("light-pass");
 
   // get memory position of attribute
   const GLint l_in_Position(pShaderManager->GetAttribute("in_Position"));
@@ -288,8 +287,7 @@ void GraphicsCore::RN_SpotLight::ItlCreateFBO()
 
 void GraphicsCore::RN_SpotLight::ItlPreRender()
 {
-    ItlGetGraphicCore()->GetShaderManager()->PushActiveShader();
-    ItlGetGraphicCore()->GetShaderManager()->ActivateShader("light-pass");
+    ItlGetGraphicCore()->GetShaderManager()->PushActiveShader("light-pass");
 }
 
 void GraphicsCore::RN_SpotLight::ItlPostRender()

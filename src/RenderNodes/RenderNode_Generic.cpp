@@ -286,9 +286,7 @@ void GraphicsCore::RN_Generic::ItlPrepareVAO()
     ShaderManager *pShaderManager = ItlGetGraphicCore()->GetShaderManager();
     assert (pShaderManager != NULL);
 
-    pShaderManager->PushActiveShader();
-
-    pShaderManager->ActivateShader("deferred_pass_cm");
+    pShaderManager->PushActiveShader("deferred_pass_cm");
 
     // generate arrays
     glGenVertexArrays(m_nNumMeshes, m_pnVertexArrayObjects);

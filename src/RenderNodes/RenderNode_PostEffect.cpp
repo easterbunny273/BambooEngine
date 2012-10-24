@@ -67,8 +67,7 @@ void GraphicsCore::RN_PostEffect::ItlPreRender()
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, this->buffer_vertices3f);
 
-    ItlGetGraphicCore()->GetShaderManager()->PushActiveShader();
-    ItlGetGraphicCore()->GetShaderManager()->ActivateShader(m_sShaderName);
+    ItlGetGraphicCore()->GetShaderManager()->PushActiveShader(m_sShaderName);
 }
 
 void GraphicsCore::RN_PostEffect::ItlRender()
@@ -191,8 +190,7 @@ void GraphicsCore::RN_PostEffect::ItlPrepareVAO()
   glBindVertexArray(vao);
   glBindBuffer(GL_ARRAY_BUFFER, this->buffer_vertices3f);
 
-  ItlGetGraphicCore()->GetShaderManager()->PushActiveShader();
-  ItlGetGraphicCore()->GetShaderManager()->ActivateShader(m_sShaderName);
+  ItlGetGraphicCore()->GetShaderManager()->PushActiveShader(m_sShaderName);
 
   const GLint l_in_Position(ItlGetGraphicCore()->GetShaderManager()->GetAttribute("in_Position"));
   const GLint l_texcoords(ItlGetGraphicCore()->GetShaderManager()->GetAttribute("in_Texcoord"));

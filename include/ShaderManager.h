@@ -71,13 +71,10 @@ namespace BambooGraphics
                                          const std::string sGeometryShaderFilename,
                                          const std::string sFragmentShaderFilename);
 
-            /// Activates the given shader if possible, else the method prints an error message to the Logger. \sa Logger
-            bool ActivateShader(std::string sName);
+            /// Activates the given shader and pushes it on the stack
+            bool PushActiveShader(std::string sName);
 
-            /// Pushs the active shader id on the stack
-            void PushActiveShader();
-
-            /// Pops the top shader from the stack and activates it
+            /// Pops the top shader from the stack and activates the new top
             void PopActiveShader();
         //@}
 
@@ -125,7 +122,6 @@ namespace BambooGraphics
         std::map<std::string, TItlShader *> m_mpShaders;
 
         std::stack<TItlShader *>	m_vpActiveShaderStack;		///< the stack for nested activating, push/pop
-        TItlShader                  * m_pCurrentActiveShader;
         //@}
     };
 };

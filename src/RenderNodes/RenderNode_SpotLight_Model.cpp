@@ -159,8 +159,7 @@ void GraphicsCore::RN_SpotLight_Model::ItlCreateVBO()
 
 void GraphicsCore::RN_SpotLight_Model::ItlPreRender()
 {
-    ItlGetGraphicCore()->GetShaderManager()->PushActiveShader();
-    ItlGetGraphicCore()->GetShaderManager()->ActivateShader("camera-debug2");
+    ItlGetGraphicCore()->GetShaderManager()->PushActiveShader("camera-debug2");
 }
 
 void GraphicsCore::RN_SpotLight_Model::ItlPostRender()
@@ -215,8 +214,7 @@ void GraphicsCore::RN_SpotLight_Model::ItlPrepareVAO()
   ShaderManager *pShaderManager = ItlGetGraphicCore()->GetShaderManager();
 
   // set "our" shader
-  pShaderManager->PushActiveShader();
-  pShaderManager->ActivateShader("light-pass");
+  pShaderManager->PushActiveShader("light-pass");
 
   // get memory position of attribute
   const GLint l_in_Position(pShaderManager->GetAttribute("in_Position"));

@@ -347,11 +347,10 @@ void GraphicsCore::RN_Deferred::ItlPreRenderChildren()
     //glClearDepth(1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    ItlGetGraphicCore()->GetShaderManager()->PushActiveShader();
     if (m_bLayeredFBO)
-      ItlGetGraphicCore()->GetShaderManager()->ActivateShader("deferred_pass_cm");
+      ItlGetGraphicCore()->GetShaderManager()->PushActiveShader("deferred_pass_cm");
     else
-      ItlGetGraphicCore()->GetShaderManager()->ActivateShader("deferred_pass");
+      ItlGetGraphicCore()->GetShaderManager()->PushActiveShader("deferred_pass");
 
     GLuint l_nUseParallax = ItlGetGraphicCore()->GetShaderManager()->GetUniform("nUseParallax");
 
@@ -364,8 +363,7 @@ void GraphicsCore::RN_Deferred::ItlPreRenderChildren()
 
 void GraphicsCore::RN_Deferred::ItlPostRenderChildren()
 {
-    // todo:: fault?
-    ItlGetGraphicCore()->GetShaderManager()->PushActiveShader();
+    ItlGetGraphicCore()->GetShaderManager()->PopActiveShader();
 
     //remove the fbo (THIS fbo) from the bound_fbos stack
     ItlPopFBO();
@@ -456,7 +454,26 @@ void GraphicsCore::RN_Deferred::ItlRender()
       glDrawBuffers(7, tDrawBuffers2);
 
 
-      ItlPostRenderChildren();
+      //remove the fbo (THIS fbo) from the bound_fbos stack
+      ItlPopFBO();
+
+      ItlPopViewportInformation();
+
+      //if there was a SceneObject_FBO bound in the SceneObject_Tree, rebind the previous bound fbo
+      if (ItlIsNestedFBO())
+      {
+          GLuint previous_bound = ItlGetTopFBO();
+          glBindFramebuffer(GL_FRAMEBUFFER, previous_bound);
+      }
+      else
+          glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+      int iOldWidth, iOldHeight;
+
+      ItlGetTopViewportInformation(iOldWidth, iOldHeight);
+
+      //restore viewport params
+      glViewport(0, 0, iOldWidth, iOldHeight);
 
       // ---BEGIN ---- this is just for debugging!
 
