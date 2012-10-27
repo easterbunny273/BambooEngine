@@ -1,8 +1,8 @@
-#include "DeferredNodeTranslator/LoadedModel_RuleObject.h"
+#include "DeferredNodeTranslator/RuleObjects/LoadedModel_RuleObject.h"
 #include "SemanticSceneNodes/LoadedModel_SemSceneNode.h"
-#include "RenderNodes/RenderNode_Generic.h"
-#include "RenderNodes/RenderNode_Camera.h"
-#include "RenderNodes/RenderNode_Deferred.h"
+#include "DeferredNodeTranslator/RenderNodes/RenderNode_Generic.h"
+#include "DeferredNodeTranslator/RenderNodes/RenderNode_Camera.h"
+#include "DeferredNodeTranslator/RenderNodes/RenderNode_Deferred.h"
 #include "Camera.h"
 #include "AssimpWrapper.h"
 
@@ -33,9 +33,9 @@ void DeferredNodeTranslator::LoadedModel_RuleObject::Action()
       {
           m_spCubemapCamera = GraphicsCore::PerspectiveCamera::Create(90.0f, 1.0f, 0.001f, 100.0f, glm::vec3(), 0.0f, 0.0f);
 
-          m_spCubemapCameraNode = std::shared_ptr<GraphicsCore::RN_Camera> (new GraphicsCore::RN_Camera(m_spCubemapCamera.get()));
+          m_spCubemapCameraNode = std::shared_ptr<RN_Camera> (new RN_Camera(m_spCubemapCamera.get()));
 
-          m_spCubemapDeferredNode = std::shared_ptr<GraphicsCore::RN_Deferred> (new GraphicsCore::RN_Deferred(128, 128, true));
+          m_spCubemapDeferredNode = std::shared_ptr<RN_Deferred> (new RN_Deferred(128, 128, true));
 
           m_spCubemapCameraNode->AddChild(m_spCubemapDeferredNode);
 
@@ -76,7 +76,7 @@ void DeferredNodeTranslator::LoadedModel_RuleObject::Action()
   else
     {
       // create new node
-      m_spCorrespondingRenderingNode = std::shared_ptr<GraphicsCore::RN_Generic>(new GraphicsCore::RN_Generic(AssimpWrapper::LoadModel(m_spSemNode->GetFilename())));
+      m_spCorrespondingRenderingNode = std::shared_ptr<RN_Generic>(new RN_Generic(AssimpWrapper::LoadModel(m_spSemNode->GetFilename())));
       assert (m_spCorrespondingRenderingNode);
 
       m_pTranslator->m_vShadowCasterNodes.push_back(m_spCorrespondingRenderingNode);

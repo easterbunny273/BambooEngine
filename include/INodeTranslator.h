@@ -11,7 +11,7 @@
 
 //#include "common_gl.h"
 //#include "Graphic.h"
-#include "RenderNodes/IRenderNode.h"
+#include "IRenderNode.h"
 
 #include <memory>
 

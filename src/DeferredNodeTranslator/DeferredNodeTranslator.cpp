@@ -1,9 +1,9 @@
 #include "DeferredNodeTranslator/DeferredNodeTranslator.h"
 
-#include "DeferredNodeTranslator/Camera_RuleObject.h"
-#include "DeferredNodeTranslator/Cube_RuleObject.h"
-#include "DeferredNodeTranslator/Light_RuleObject.h"
-#include "DeferredNodeTranslator/LoadedModel_RuleObject.h"
+#include "DeferredNodeTranslator/RuleObjects/Camera_RuleObject.h"
+#include "DeferredNodeTranslator/RuleObjects/Cube_RuleObject.h"
+#include "DeferredNodeTranslator/RuleObjects/Light_RuleObject.h"
+#include "DeferredNodeTranslator/RuleObjects/LoadedModel_RuleObject.h"
 
 #include "BambooLib/include/Logger.h"
 

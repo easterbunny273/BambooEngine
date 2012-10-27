@@ -9,7 +9,7 @@
 #define __realtime_lu_graphic
 
 // opengl libs
-#include "common_gl.h"
+#include "GLUtils.h"
 
 // stl includes
 #include <memory>
@@ -43,18 +43,6 @@ namespace BambooGraphics
         //@{
             class IRenderNode;
             class IRenderNode_Cullable;
-
-            class RN_PostEffect;
-            class RN_Camera;
-            class RN_FBO;
-            class RN_RenderPass;
-            class RN_BoundingBox;
-            class RN_AssimpImport;
-            class RN_Generic;
-            class RN_Deferred;
-            class RN_SpotLight;
-            class RN_CubeMap;
-            class RN_SpotLight_Model;
         //@}
 
     public:
@@ -95,10 +83,10 @@ namespace BambooGraphics
         /*! \name Nested classes, forward declarations */
         //@{
     #ifdef GLFW
-            class GlfwWindow;
+            class GlfwWindowRenderTarget;
     #endif
     #ifdef QT_OPENGL_LIB
-            class QtWidgetWrapper;
+            class QtWidgetRenderTarget;
     #endif
             class ICamera;
             class PerspectiveCamera;

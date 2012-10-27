@@ -9,11 +9,12 @@
 #ifndef __BAMBOOENGINE_CUBERULEOBJECT_DEFERREDTRANSLATOR_HEADER
 #define __BAMBOOENGINE_CUBERULEOBJECT_DEFERREDTRANSLATOR_HEADER
 
-#include "common_gl.h"
+#include "GLUtils.h"
 #include "Graphic.h"
 #include "DeferredNodeTranslator/DeferredNodeTranslator.h"
 #include "SemanticSceneNodes/Cube_SemSceneNode.h"
 #include "BambooLib/include/GeneralDefinitions.h"
+#include "DeferredNodeTranslator/RenderNodes/RenderNode_Generic.h"
 #include <memory>
 
 namespace BambooGraphics
@@ -30,7 +31,7 @@ namespace BambooGraphics
       std::vector<BambooLib::t_classID> GetAcceptedNodeIDs() const;
 
     private:
-    std::shared_ptr<GraphicsCore::RN_Generic>      m_spCorrespondingRenderingNode;
+    std::shared_ptr<RN_Generic>      m_spCorrespondingRenderingNode;
     std::shared_ptr<Cube_SemSceneNode> m_spSemNode;
     };
 

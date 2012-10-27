@@ -66,6 +66,16 @@ public:
 
   /*! \name Forward declarations */
   //@{
+      /*class RenderNode_Camera;
+      class RenderNode_CubeMap;
+      class RenderNode_Deferred;
+      class RenderNode_FBO;
+      class RenderNode_PostEffect;
+      class RenderNode_RenderPass;
+      class RenderNode_SpotLight;
+      class RenderNode_SpotLight_Model;
+      class RenderNode_BoundingBox;*/
+
       class Camera_RuleObject;
       class Cube_RuleObject;
       class LoadedModel_RuleObject;
@@ -93,7 +103,7 @@ private:
   std::vector<std::shared_ptr<GraphicsCore::IRenderNode> > m_vLightNodes;
   std::vector<std::shared_ptr<GraphicsCore::IRenderNode> > m_vShadowCasterNodes;
 
-  std::shared_ptr<GraphicsCore::RN_Deferred>    m_spDeferredNode;
+  std::shared_ptr<RN_Deferred>    m_spDeferredNode;
 };
 
 }

@@ -1,8 +1,8 @@
-#include "DeferredNodeTranslator/Camera_RuleObject.h"
+#include "DeferredNodeTranslator/RuleObjects/Camera_RuleObject.h"
 #include "SemanticSceneNodes/Camera_SemSceneNode.h"
 
-#include "RenderNodes/RenderNode_Camera.h"
-#include "RenderNodes/RenderNode_Deferred.h"
+#include "DeferredNodeTranslator/RenderNodes/RenderNode_Camera.h"
+#include "DeferredNodeTranslator/RenderNodes/RenderNode_Deferred.h"
 #include "Camera.h"
 
 namespace BambooGraphics
@@ -25,11 +25,11 @@ void DeferredNodeTranslator::Camera_RuleObject::Action()
   {
       std::shared_ptr<GraphicsCore::ICamera> spCamera = m_spSemNode->GetCamera();
 
-      m_pTranslator->m_spRootNode = std::shared_ptr<GraphicsCore::IRenderNode>(new GraphicsCore::RN_Camera(spCamera.get()));
+      m_pTranslator->m_spRootNode = std::shared_ptr<GraphicsCore::IRenderNode>(new RN_Camera(spCamera.get()));
 
       m_pTranslator->m_spRootNode->SetInitialViewportInformation(1024,768);
 
-      std::shared_ptr<GraphicsCore::RN_Deferred> spDeferredNode(new GraphicsCore::RN_Deferred(1024,768, false));
+      std::shared_ptr<RN_Deferred> spDeferredNode(new RN_Deferred(1024,768, false));
 
       spDeferredNode->SetGraphicCore(m_pTranslator->m_pCore);
 

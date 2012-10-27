@@ -1,7 +1,7 @@
-#include "DeferredNodeTranslator/Light_RuleObject.h"
+#include "DeferredNodeTranslator/RuleObjects/Light_RuleObject.h"
 #include "SemanticSceneNodes/Light_SemSceneNode.h"
-#include "RenderNodes/RenderNode_SpotLight.h"
-#include "RenderNodes/RenderNode_SpotLight_Model.h"
+#include "DeferredNodeTranslator/RenderNodes/RenderNode_SpotLight.h"
+#include "DeferredNodeTranslator/RenderNodes/RenderNode_SpotLight_Model.h"
 
 namespace BambooGraphics
 {
@@ -34,14 +34,14 @@ void DeferredNodeTranslator::Light_RuleObject::Action()
     }
   else
     {
-      m_spCorrespondingRenderingNode = std::shared_ptr<GraphicsCore::RN_SpotLight>(new GraphicsCore::RN_SpotLight(vPosition, vLookAt, fFOV, vColor));
+      m_spCorrespondingRenderingNode = std::shared_ptr<RN_SpotLight>(new RN_SpotLight(vPosition, vLookAt, fFOV, vColor));
       assert (m_spCorrespondingRenderingNode);
 
       m_pTranslator->m_vLightNodes.push_back(m_spCorrespondingRenderingNode);
 
       m_spCorrespondingRenderingNode->SetGraphicCore(m_pTranslator->m_pCore);
 
-      m_spCorrespondingRenderingNode_Model = std::shared_ptr<GraphicsCore::RN_SpotLight_Model>(new GraphicsCore::RN_SpotLight_Model(vPosition, vLookAt, fFOV, vColor));
+      m_spCorrespondingRenderingNode_Model = std::shared_ptr<RN_SpotLight_Model>(new RN_SpotLight_Model(vPosition, vLookAt, fFOV, vColor));
       assert(m_spCorrespondingRenderingNode_Model);
 
       m_spCorrespondingRenderingNode_Model->SetGraphicCore(m_pTranslator->m_pCore);
