@@ -20,13 +20,13 @@ void DeferredNodeTranslator::Light_RuleObject::Action()
   float fFOV, fNear, fFar;
   glm::vec3 vColor, vPosition, vLookAt;
 
-  m_spSemNode->GetLightParameters(vPosition, vLookAt, fFOV, vColor, fNear, fFar);
+  m_pSemNode->GetLightParameters(vPosition, vLookAt, fFOV, vColor, fNear, fFar);
 
   if (m_spCorrespondingRenderingNode)
     {
       // only update parameters
-      m_spCorrespondingRenderingNode->SetTransformMatrix(m_spSemNode->GetTransformMatrix());
-      m_spCorrespondingRenderingNode_Model->SetTransformMatrix(m_spSemNode->GetTransformMatrix());
+      m_spCorrespondingRenderingNode->SetTransformMatrix(m_pSemNode->GetTransformMatrix());
+      m_spCorrespondingRenderingNode_Model->SetTransformMatrix(m_pSemNode->GetTransformMatrix());
 
       m_spCorrespondingRenderingNode->ClearChilds();
       for (unsigned int i=0; i < m_pTranslator->m_vShadowCasterNodes.size(); i++)
@@ -51,11 +51,11 @@ void DeferredNodeTranslator::Light_RuleObject::Action()
     }
 }
 
-DeferredNodeTranslator::IRuleObject *DeferredNodeTranslator::Light_RuleObject::CloneFor(std::shared_ptr<ISemanticSceneNode> spSemNode, DeferredNodeTranslator *pTranslator)
+DeferredNodeTranslator::IRuleObject *DeferredNodeTranslator::Light_RuleObject::CloneFor(ISemanticSceneNode *pSemNode, DeferredNodeTranslator *pTranslator)
 {
   Light_RuleObject *pNewObject = new Light_RuleObject();
 
-  pNewObject->m_spSemNode = std::dynamic_pointer_cast<Light_SemSceneNode>(spSemNode);
+  pNewObject->m_pSemNode = Light_SemSceneNode::Cast(pSemNode);
   pNewObject->m_pTranslator = pTranslator;
 
   return pNewObject;

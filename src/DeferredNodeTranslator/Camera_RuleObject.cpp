@@ -23,7 +23,7 @@ void DeferredNodeTranslator::Camera_RuleObject::Action()
 
   if (!bRootAlreadyCreated)
   {
-      std::shared_ptr<GraphicsCore::ICamera> spCamera = m_spSemNode->GetCamera();
+      std::shared_ptr<GraphicsCore::ICamera> spCamera = m_pSemNodeCamera->GetCamera();
 
       m_pTranslator->m_spRootNode = std::shared_ptr<GraphicsCore::IRenderNode>(new RN_Camera(spCamera.get()));
 
@@ -37,14 +37,14 @@ void DeferredNodeTranslator::Camera_RuleObject::Action()
       m_pTranslator->m_spRootNode->AddChild(spDeferredNode);
   }
 
-  m_spSemNode->GetCamera()->Move(0.0001f);
+  m_pSemNodeCamera->GetCamera()->Move(0.0001f);
 }
 
-DeferredNodeTranslator::IRuleObject *DeferredNodeTranslator::Camera_RuleObject::CloneFor(std::shared_ptr<ISemanticSceneNode> spSemNode, DeferredNodeTranslator *pTranslator)
+DeferredNodeTranslator::IRuleObject *DeferredNodeTranslator::Camera_RuleObject::CloneFor(ISemanticSceneNode *pSemNode, DeferredNodeTranslator *pTranslator)
 {
   Camera_RuleObject *pNewObject = new Camera_RuleObject();
 
-  pNewObject->m_spSemNode = std::dynamic_pointer_cast<Camera_SemSceneNode>(spSemNode);;
+  pNewObject->m_pSemNodeCamera = Camera_SemSceneNode::Cast(pSemNode);
   pNewObject->m_pTranslator = pTranslator;
 
   return pNewObject;

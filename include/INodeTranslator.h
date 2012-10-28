@@ -27,7 +27,7 @@ namespace BambooGraphics
 class INodeTranslator
 {
 public:
-  virtual void Translate(std::shared_ptr<ISemanticSceneNode> spSemRoot) = 0;
+  virtual void Translate(ISemanticSceneNode * spSemRoot) = 0;
 
   std::shared_ptr<GraphicsCore::IRenderNode> GetRenderGraph() { return m_spRootNode; }
 

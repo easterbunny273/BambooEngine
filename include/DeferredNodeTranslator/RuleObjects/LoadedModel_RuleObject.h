@@ -23,7 +23,7 @@ namespace BambooGraphics
 class DeferredNodeTranslator::LoadedModel_RuleObject : public DeferredNodeTranslator::IRuleObject
 {
 public:
-  virtual IRuleObject * CloneFor(std::shared_ptr<ISemanticSceneNode> spSemNode, DeferredNodeTranslator *pTranslator);
+  virtual IRuleObject * CloneFor(ISemanticSceneNode *pSemNode, DeferredNodeTranslator *pTranslator);
 
   /// update the rendering scene graph pieces which correspond to the given semantic scene node
   virtual void Action();
@@ -33,7 +33,7 @@ public:
 
 private:
   std::shared_ptr<RN_Generic>      m_spCorrespondingRenderingNode;
-  std::shared_ptr<LoadedModel_SemSceneNode> m_spSemNode;
+  LoadedModel_SemSceneNode  * m_pSemNode;
 
   std::shared_ptr<GraphicsCore::ICamera>      m_spCubemapCamera;
   std::shared_ptr<RN_Camera>    m_spCubemapCameraNode;

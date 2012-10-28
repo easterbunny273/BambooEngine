@@ -355,7 +355,7 @@ void RN_Deferred::ItlPreRenderChildren()
     GLuint l_nUseParallax = ItlGetGraphicCore()->GetShaderManager()->GetUniform("nUseParallax");
 
     assert (l_nUseParallax != -1);
-    //glUniform1i(l_nUseParallax, s_nUseParallax % 2);
+    glUniform1i(l_nUseParallax, 0);
 
     ItlPushViewportInformation(m_nWidth, m_nHeight);
 

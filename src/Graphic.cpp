@@ -81,7 +81,7 @@ namespace BambooGraphics
             pRenderLoop->spRenderTarget->ClearBuffers();
 
             // translate semantic scene graph into a rendering scene graph
-            pRenderLoop->spTranslator->Translate(pRenderLoop->spSceneRoot);
+            pRenderLoop->spTranslator->Translate(pRenderLoop->pSceneRoot);
 
             // get render scene graph from translator
             std::shared_ptr<IRenderNode> spRenderNode = pRenderLoop->spTranslator->GetRenderGraph();
@@ -117,7 +117,7 @@ namespace BambooGraphics
     /****************************************************************
       *************************************************************** */
     int GraphicsCore::AddRenderLoop(std::shared_ptr<IRenderTarget> spRenderTarget,
-                              std::shared_ptr<ISemanticSceneNode> spRootNode,
+                              ISemanticSceneNode * pRootNode,
                               std::shared_ptr<INodeTranslator> spTranslator)
     {
         static int iID = 0;
@@ -125,7 +125,7 @@ namespace BambooGraphics
         TItlRenderLoop NewLoop;
 
         NewLoop.spRenderTarget  = spRenderTarget;
-        NewLoop.spSceneRoot     = spRootNode;
+        NewLoop.pSceneRoot     = pRootNode;
         NewLoop.spTranslator    = spTranslator;
 
         m_mRenderLoops[iID++] = NewLoop;

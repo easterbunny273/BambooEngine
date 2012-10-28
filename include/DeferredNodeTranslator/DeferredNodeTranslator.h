@@ -33,7 +33,7 @@ public:
     class IRuleObject
     {
     public:
-      virtual IRuleObject * CloneFor(std::shared_ptr<ISemanticSceneNode> spSemNode, DeferredNodeTranslator *pTranslator) = 0;
+      virtual IRuleObject * CloneFor(ISemanticSceneNode *pSemNode, DeferredNodeTranslator *pTranslator) = 0;
 
       /// update the rendering scene graph pieces which correspond to the given semantic scene node
       virtual void Action() = 0;
@@ -54,7 +54,7 @@ public:
 
     protected:
       DeferredNodeTranslator * m_pTranslator;
-      std::shared_ptr<ISemanticSceneNode> m_spSemNode;
+      ISemanticSceneNode     * m_pSemNode;
     };
   //@}
 
@@ -85,7 +85,7 @@ public:
 
   /*! \name INodeTranslator interface */
   //@{
-    virtual void Translate(std::shared_ptr<ISemanticSceneNode> spSemRoot);
+    virtual void Translate(ISemanticSceneNode *pSemRoot);
   //@}
 
 private:
@@ -93,7 +93,7 @@ private:
   //@{
       void ItlRegisterRuleObjectPrototype(std::shared_ptr<IRuleObject> pObject);
 
-      void ItlTranslateSemNode(std::shared_ptr<ISemanticSceneNode> spSemNode);
+      void ItlTranslateSemNode(ISemanticSceneNode *pSemNode);
   //@}
 
   std::map<BambooLib::t_objectID, std::shared_ptr<IRuleObject> > m_mCachedRuleObjects;

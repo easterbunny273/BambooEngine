@@ -129,7 +129,7 @@ namespace BambooGraphics
         //@{
             /// adds a render loop and returns its id
             int AddRenderLoop(std::shared_ptr<IRenderTarget> spRenderTarget,
-                              std::shared_ptr<ISemanticSceneNode> spRootNode,
+                              ISemanticSceneNode *pRootNode,
                               std::shared_ptr<INodeTranslator> spTranslator);
 
             /// removes a render loop
@@ -142,7 +142,7 @@ namespace BambooGraphics
             struct TItlRenderLoop
             {
                 std::shared_ptr<IRenderTarget>      spRenderTarget;
-                std::shared_ptr<ISemanticSceneNode> spSceneRoot;
+                ISemanticSceneNode * pSceneRoot;
                 std::shared_ptr<INodeTranslator>    spTranslator;
             };
         //@}

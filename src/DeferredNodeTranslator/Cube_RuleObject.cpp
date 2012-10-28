@@ -22,11 +22,11 @@ void DeferredNodeTranslator::Cube_RuleObject::Action()
   if (m_spCorrespondingRenderingNode)
     {
       // only update values
-      m_spCorrespondingRenderingNode->SetTransformMatrix(m_spSemNode->GetTransformMatrix());
+      m_spCorrespondingRenderingNode->SetTransformMatrix(m_pSemNode->GetTransformMatrix());
     }
   else
     {
-      Cube *pCube = m_spSemNode->GetCube();
+      Cube *pCube = m_pSemNode->GetCube();
       std::shared_ptr<GeometryData::GenericObject> spGenericObject = pCube->GenerateGenericObject();
 
       // create new node
@@ -44,12 +44,12 @@ void DeferredNodeTranslator::Cube_RuleObject::Action()
 
 }
 
-DeferredNodeTranslator::IRuleObject *DeferredNodeTranslator::Cube_RuleObject::CloneFor(std::shared_ptr<ISemanticSceneNode> spSemNode, DeferredNodeTranslator *pTranslator)
+DeferredNodeTranslator::IRuleObject *DeferredNodeTranslator::Cube_RuleObject::CloneFor(ISemanticSceneNode *pSemNode, DeferredNodeTranslator *pTranslator)
 {
   Cube_RuleObject *pNewObject = new Cube_RuleObject();
 
   pNewObject->m_pTranslator   = pTranslator;
-  pNewObject->m_spSemNode     = std::dynamic_pointer_cast<Cube_SemSceneNode>(spSemNode);
+  pNewObject->m_pSemNode     = Cube_SemSceneNode::Cast(pSemNode);
 
   return pNewObject;
 }
