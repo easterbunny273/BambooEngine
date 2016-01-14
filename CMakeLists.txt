@@ -9,17 +9,18 @@ cmake_minimum_required(VERSION 2.8.11)
 
 project (BambooEngine)
 
-set(INCLUDE_DIR "include")
-
 add_subdirectory(external/glfw)
 include_directories(external/glfw/include)
+
+include_directories(${BAMBOO_LIB}/include)
+include_directories("include/")
 
 # Add paths for GLEW
 find_package(GLEW REQUIRED)
 include_directories(${GLEW_INCLUDE_DIR})
 
 # Add source/header files
-file (GLOB HEADER_FILES "${INCLUDE_DIR}/*.h")
+file (GLOB HEADER_FILES "include/*.h")
 aux_source_directory(src SOURCE_FILES)
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -36,9 +37,9 @@ endif()
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ENABLE_CXX11}")
 
 #SET_TARGET_PROPERTIES(BambooEngine PROPERTIES DEBUG_POSTFIX "_d")
-add_executable(BambooEngine ${SOURCE_FILES})
+add_executable(BambooEngine ${SOURCE_FILES} ${HEADER_FILES})
 
-target_link_libraries(BambooEngine glfw ${GLFW_LIBRARIES} ${GLEW_LIBRARY})
+target_link_libraries(BambooEngine glfw opengl32 ${GLFW_LIBRARIES} ${GLEW_LIBRARY})
 
 add_custom_command(TARGET BambooEngine POST_BUILD        # Adds a post-build event to MyTest
     COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake - E copy_if_different..."
