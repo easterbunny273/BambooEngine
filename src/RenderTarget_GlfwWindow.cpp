@@ -56,6 +56,8 @@ bool RenderTarget_GlfwWindow::pepareForRendering()
 {
 	glfwMakeContextCurrent(m_window);
 
+	glViewport(0, 0, m_width, m_height);
+
 	return true;
 }
 

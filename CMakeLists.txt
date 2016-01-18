@@ -14,16 +14,42 @@ include_directories(external/glfw/include)
 
 include_directories(${BAMBOO_LIB}/include)
 include_directories("include/")
+include_directories("src/")
 
 # Add paths for GLEW
 find_package(GLEW REQUIRED)
 include_directories(${GLEW_INCLUDE_DIR})
 
 # Add source/header files
-file (GLOB HEADER_FILES "include/*.h")
-aux_source_directory(src SOURCE_FILES)
-source_group("Header Files" FILES ${HEADER_FILES})
+#file (GLOB HEADER_FILES "include/*.h")
+#aux_source_directory(src SOURCE_FILES)
+#source_group("Header Files" FILES ${HEADER_FILES})
 
+set (SOURCE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src)
+file(GLOB_RECURSE ALL_FILES RELATIVE ${SOURCE_DIRECTORY} "src/*.cpp" "src/*.h")
+file(GLOB_RECURSE ALL_FILES_f ${SOURCE_DIRECTORY} "src/*.cpp" "src/*.h")
+
+MESSAGE("DBG ALL_FILES=${ALL_FILES}")
+
+foreach(FILE ${ALL_FILES}) 
+  get_filename_component(PARENT_DIR "${FILE}" PATH)
+
+  set (FULL_FILENAME ${SOURCE_DIRECTORY}/${FILE})
+  # skip src or include and changes /'s to \\'s
+  string(REGEX REPLACE "(\\./)?(src|include)/?" "" GROUP "${PARENT_DIR}")
+  string(REPLACE "/" "\\" GROUP "${GROUP}")
+
+  # group into "Source Files" and "Header Files"
+  #if ("${FILE}" MATCHES ".*\\.cpp")
+  #  set(GROUP "Source Files\\${GROUP}")
+  #elseif("${FILE}" MATCHES ".*\\.h")
+  #  set(GROUP "Header Files\\${GROUP}")
+  #endif()
+
+  MESSAGE("DBG GROUP=${GROUP}, FOO=${FILE}, ${FULL_FILENAME}")
+
+  source_group("Source Files\\${GROUP}" FILES "${FULL_FILENAME}")
+endforeach()
 
 
 # Make sure we get C++11
@@ -37,7 +63,7 @@ endif()
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ENABLE_CXX11}")
 
 #SET_TARGET_PROPERTIES(BambooEngine PROPERTIES DEBUG_POSTFIX "_d")
-add_executable(BambooEngine ${SOURCE_FILES} ${HEADER_FILES})
+add_executable(BambooEngine ${ALL_FILES_f} ${HEADER_FILES})
 
 target_link_libraries(BambooEngine glfw opengl32 ${GLFW_LIBRARIES} ${GLEW_LIBRARY})
 
