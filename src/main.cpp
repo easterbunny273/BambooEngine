@@ -1,15 +1,30 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "RenderTarget_GlfwWindow.h"
-#include "RenderContext.h"
-#include "RenderTreeNode_DummyTriangle.h"
+#include "Rendering/RenderTargets/RenderTarget_GlfwWindow.h"
+#include "Rendering/RenderContext.h"
+#include "Rendering/RenderTree/RenderTreeNode_DummyTriangle.h"
+
+#include <cassert>
+
+class EventHandler : public RenderTarget_GlfwWindow::IGLFWInputEventHandler
+{
+public:
+	virtual bool onKeyCallback(RenderTarget_GlfwWindow * window, int key, int scancode, int action, int mods) override
+	{
+		std::cout << window << " pressed " << key << ", action " << action << std::endl;
+		return false;
+	};
+
+	virtual bool onCursorPositionCallback(RenderTarget_GlfwWindow * window, double xpos, double ypos) override
+	{
+		std::cout << window << " mousepos " << xpos << "," << ypos << std::endl;
+		return false;
+	};
+};
 
 int main(void)
 {
-	/* Initialize the library */
-	auto result = glewInit();
-
 	RenderTarget_GlfwWindow::WindowHints windowHints = {
 		RenderTarget_GlfwWindow::WindowHint(GLFW_SAMPLES, 4),
 		RenderTarget_GlfwWindow::WindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API),
@@ -19,11 +34,21 @@ int main(void)
 	};
 
 	auto window = RenderTarget_GlfwWindow::create(1024, 768, "hello!", windowHints);
+	auto window2 = RenderTarget_GlfwWindow::create(1024, 768, "hello 2", windowHints);
 
 	if (!window)
 		return -1;
 
+	// Initialize glew - must be done *after* creation of an opengl context!
 	window->pepareForRendering();
+	auto result = glewInit();
+	assert(result == GLEW_OK);
+
+	EventHandler handler;
+
+	window->pepareForRendering();
+	window->registerEventListener(&handler);
+	window2->registerEventListener(&handler);
 
 	auto context = RenderContext();
 	auto dummyNode = RenderTreeNode_DummyTriangle();

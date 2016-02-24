@@ -71,11 +71,3 @@ add_custom_command(TARGET BambooEngine POST_BUILD        # Adds a post-build eve
     COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake - E copy_if_different..."
         "${GLEW_INCLUDE_DIR}/../bin/Release/x64/glew32.dll"      # <--this is in-file
         $<TARGET_FILE_DIR:BambooEngine>)                 # <--this is out-file path
-
-# include test subdirectory
-#add_subdirectory("test")
-
-# add tests to cmake project, so that it generates a ctest target
-#enable_testing()
-#add_test(tests test/tests)
-
