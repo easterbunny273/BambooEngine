@@ -165,7 +165,7 @@ std::unique_ptr<RenderTarget_GlfwWindow> RenderTarget_GlfwWindow::create(unsigne
 
 bool RenderTarget_GlfwWindow::pepareForRendering()
 {
-	glfwMakeContextCurrent(m_window);
+	makeCurrent();
 
 	glViewport(0, 0, m_width, m_height);
 
@@ -190,4 +190,11 @@ void RenderTarget_GlfwWindow::unregisterEventListener(IGLFWInputEventHandler* pL
 
 	if (iter != m_registeredInputHandlers.end())
 		m_registeredInputHandlers.erase(iter);
+}
+
+bool RenderTarget_GlfwWindow::makeCurrent()
+{
+	glfwMakeContextCurrent(m_window);
+
+	return true;
 }

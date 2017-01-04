@@ -2,8 +2,11 @@
 #include <GLFW/glfw3.h>
 
 #include "Rendering/RenderTargets/RenderTarget_GlfwWindow.h"
-#include "Rendering/RenderContext.h"
 #include "Rendering/RenderTree/RenderTreeNode_DummyTriangle.h"
+#include "Rendering/RenderContext.h"
+//#include "Rendering/GLContext.h"
+
+#include "Rendering/PipelineState.h"
 
 #include <cassert>
 
@@ -34,7 +37,7 @@ int main(void)
 	};
 
 	auto window = RenderTarget_GlfwWindow::create(1024, 768, "hello!", windowHints);
-	auto window2 = RenderTarget_GlfwWindow::create(1024, 768, "hello 2", windowHints);
+	//auto window2 = RenderTarget_GlfwWindow::create(1024, 768, "hello 2", windowHints);
 
 	if (!window)
 		return -1;
@@ -46,17 +49,25 @@ int main(void)
 
 	EventHandler handler;
 
-	window->pepareForRendering();
 	window->registerEventListener(&handler);
-	window2->registerEventListener(&handler);
+	//window2->registerEventListener(&handler);
+
+	//GLContext contextManager(*window);
 
 	auto context = RenderContext();
 	auto dummyNode = RenderTreeNode_DummyTriangle();
+
+	/*PipelineState testState;
+	testState.blend = true;
+
+	PipelineStateManager::getRealStateFromGPU(testState);*/
+
 
 	/* Loop until the user closes the window */
 	int i = 0;
 	while (true)
 	{
+		window->pepareForRendering();
 		/* Render here */
 		
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -65,7 +76,6 @@ int main(void)
 		glEnable(GL_MULTISAMPLE);
 
 		dummyNode.render(context);
-
 		window->onRenderingFinished();
 
 		/* Poll for and process events */

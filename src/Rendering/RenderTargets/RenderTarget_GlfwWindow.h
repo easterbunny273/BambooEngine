@@ -4,6 +4,8 @@
 #define __BAMBOOENGINE_RENDERTARGET_GLFWWINDOW_H_
 
 #include "IRenderTarget.h"
+#include "../IGLContext.h"
+
 #include <GLFW/glfw3.h>
 
 #include <vector>
@@ -11,7 +13,7 @@
 #include <map>
 #include <iostream>
 
-class RenderTarget_GlfwWindow : public IRenderTarget
+class RenderTarget_GlfwWindow : public IRenderTarget, public IGLContext
 {
 public:
 	class IGLFWInputEventHandler
@@ -49,6 +51,9 @@ public:
 
 	GLFWwindow * getGlfwWindow() { return m_window; }
 
+
+	// implementing IGLContext
+	virtual bool makeCurrent();
 private:
 	RenderTarget_GlfwWindow(unsigned int width, unsigned int height, const std::string &u8Title, GLFWwindow * createdWindow);
 

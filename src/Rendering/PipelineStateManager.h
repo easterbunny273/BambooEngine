@@ -7,46 +7,26 @@
 
 #include "GL/glew.h"
 
+#include "PipelineState.h"
+
 class PipelineStateManager
 {
 public:
-	class PipelineStateObject
-	{
-	public:
-		struct DepthTestState
-		{
-			bool active;
-			GLenum depthFunc;
-
-			bool operator==(const DepthTestState &rOther) const { return (active == rOther.active && depthFunc == rOther.depthFunc); }
-			bool operator!=(const DepthTestState &rOther) const { return !operator==(rOther); }
-			DepthTestState(bool _active, GLenum _depthFunc) : active(_active), depthFunc(_depthFunc) {};
-		};
-
-		DepthTestState depthTestState;
-
-		using PSOPtr = std::shared_ptr<PipelineStateObject>;
-
-		static PSOPtr createDefaultStateObject() {
-			auto depthTest = DepthTestState(true, GL_LEQUAL);
-			return std::shared_ptr<PipelineStateObject>(new PipelineStateObject(depthTest));
-		};
-
-		void load(PipelineStateObject &oldState);
-	private:
-		bool assertDepthTestIsSet(const DepthTestState &state);
-		void updateDepthTestState(const DepthTestState &newState);
-
-		PipelineStateObject(DepthTestState depthTest) : depthTestState(depthTest) {};
-	};
-
-	void loadPipelineState(PipelineStateObject &object);
-
+	void loadPipelineState(const PipelineState &object);
+	static void getRealStateFromGPU(PipelineState &object);
 private:
-
+	void setState(GLenum state, bool active);
 	
+	static GLenum translateDepthFunction(PipelineState::EDepthFunction depthFunction);
+	static PipelineState::EDepthFunction translateDepthFunction(GLenum depthFunction);
 
-	PipelineStateObject	m_currentState;
+	static GLenum translateBlendFactor(PipelineState::_BlendFunction::EFunc blendFactor);
+	static PipelineState::_BlendFunction::EFunc translateBlendFactor(GLenum blendFactor);
+
+	static GLenum translateCullFaceMode(PipelineState::ECullFaceMode cullFaceMode);
+	static PipelineState::ECullFaceMode translateCullFaceMode(GLenum cullFaceMode);
+
+	PipelineState	m_currentState;
 };
 
 #endif
