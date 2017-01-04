@@ -32,7 +32,7 @@ public:
 
 int main(void)
 {
-    try
+    /*try
     {
         boost::asio::io_service io_service;
         tcp::acceptor acceptor(io_service, tcp::endpoint(tcp::v4(), 1300));
@@ -50,7 +50,7 @@ int main(void)
     catch (std::exception& e)
     {
         std::cerr << e.what() << std::endl;
-    }
+    }*/
 
 	RenderTarget_GlfwWindow::WindowHints windowHints = {
 		RenderTarget_GlfwWindow::WindowHint(GLFW_SAMPLES, 4),
