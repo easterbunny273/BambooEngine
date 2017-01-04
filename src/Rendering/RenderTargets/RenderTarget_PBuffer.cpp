@@ -1,10 +1,13 @@
+#ifdef _WIN32
+
 #include <GL/glew.h>
 #include <GL/wglew.h>
-#include <GL/GL.h>
+#include <GL/gl.h>
 
 #include "RenderTarget_PBuffer.h"
 #include <cassert>
 #include <string>
+#include <memory>
 
 std::unique_ptr<RenderTarget_PBuffer> RenderTarget_PBuffer::create(unsigned int _width, unsigned int _height, unsigned int multisampling)
 {
@@ -105,3 +108,4 @@ void RenderTarget_PBuffer::onRenderingFinished()
     wglMakeCurrent(m_originalDC, m_originalGlRC);
 }
 
+#endif

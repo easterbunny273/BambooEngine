@@ -179,17 +179,17 @@ void RenderTarget_GlfwWindow::onRenderingFinished()
 
 void RenderTarget_GlfwWindow::registerEventListener(IGLFWInputEventHandler* pListener)
 {
-	assert(std::find(m_registeredInputHandlers.begin(), m_registeredInputHandlers.end(), pListener) == m_registeredInputHandlers.end());
+//	assert(std::find(m_registeredInputHandlers.begin(), m_registeredInputHandlers.end(), pListener) == m_registeredInputHandlers.end());
 
 	m_registeredInputHandlers.push_back(pListener);
 }
 
 void RenderTarget_GlfwWindow::unregisterEventListener(IGLFWInputEventHandler* pListener)
 {
-	auto iter = std::find(m_registeredInputHandlers.begin(), m_registeredInputHandlers.end(), pListener);
+   /* auto iter = std::find(m_registeredInputHandlers.begin(), m_registeredInputHandlers.end(), pListener);
 
 	if (iter != m_registeredInputHandlers.end())
-		m_registeredInputHandlers.erase(iter);
+        m_registeredInputHandlers.erase(iter);*/
 }
 
 bool RenderTarget_GlfwWindow::makeCurrent()

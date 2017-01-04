@@ -1,6 +1,7 @@
 #include "RenderTreeNode.h"
 
 #include <cassert>
+#include <algorithm>
 
 bool RenderTreeNode::render(RenderContext &context)
 {

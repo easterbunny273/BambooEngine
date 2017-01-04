@@ -1,3 +1,5 @@
+#ifdef _WIN32
+
 #pragma once
 
 #ifndef __BAMBOOENGINE_RENDERTARGET_PBUFFER_H_
@@ -35,5 +37,7 @@ private:
     unsigned int m_width, m_height;
 
 };
+
+#endif
 
 #endif

@@ -26,11 +26,23 @@ endif()
 set(Boost_USE_STATIC_LIBS OFF) 
 set(Boost_USE_MULTITHREADED ON)  
 set(Boost_USE_STATIC_RUNTIME OFF) 
-find_package(Boost 1.60.0 REQUIRED) 
+find_package(Boost 1.60.0 REQUIRED COMPONENTS system)
 
 if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})
   link_directories(${Boost_LIBRARY_DIRS})
+else()
+  message(FATAL_ERROR "Could not find boost." )
+endif()
+
+if (NOT WIN32)
+    # Add paths for GL
+    find_package(OpenGL REQUIRED)
+    include_directories(${OPENGL_INCLUDE_DIRS})
+    set(OPENGL_LINK_LIBRARIES ${OPENGL_LIBRARIES})
+    #message( FATAL_ERROR "You can not do this at all, CMake will exit." )
+else()
+    set(OPENGL_LINK_LIBRARIES "opengl32")
 endif()
 
 # Add paths for GLEW
@@ -77,14 +89,16 @@ if(CMAKE_COMPILER_IS_GNUCXX)
       SET(ENABLE_CXX11 "-std=c++0x")
    endif()
 endif()
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ENABLE_CXX11}")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
 #SET_TARGET_PROPERTIES(BambooEngine PROPERTIES DEBUG_POSTFIX "_d")
 add_executable(BambooEngine ${ALL_FILES_f} ${HEADER_FILES})
 
-target_link_libraries(BambooEngine glfw opengl32 ${GLFW_LIBRARIES} ${GLEW_LIBRARY} ${Boost_LIBRARIES})
+target_link_libraries(BambooEngine glfw ${OPENGL_LINK_LIBRARIES} ${GLFW_LIBRARIES} ${GLEW_LIBRARY} ${Boost_LIBRARIES})
 
-add_custom_command(TARGET BambooEngine POST_BUILD        # Adds a post-build event to MyTest
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake - E copy_if_different..."
-        "${GLEW_INCLUDE_DIR}/../bin/Release/x64/glew32.dll"      # <--this is in-file
-        $<TARGET_FILE_DIR:BambooEngine>)                 # <--this is out-file path
+if (WIN32)
+    add_custom_command(TARGET BambooEngine POST_BUILD        # Adds a post-build event to MyTest
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake - E copy_if_different..."
+            "${GLEW_INCLUDE_DIR}/../bin/Release/x64/glew32.dll"      # <--this is in-file
+            $<TARGET_FILE_DIR:BambooEngine>)                 # <--this is out-file path
+endif()
