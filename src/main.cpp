@@ -10,6 +10,10 @@
 
 #include <cassert>
 
+#include <boost/asio.hpp>
+
+using boost::asio::ip::tcp;
+
 class EventHandler : public RenderTarget_GlfwWindow::IGLFWInputEventHandler
 {
 public:
@@ -28,6 +32,26 @@ public:
 
 int main(void)
 {
+    try
+    {
+        boost::asio::io_service io_service;
+        tcp::acceptor acceptor(io_service, tcp::endpoint(tcp::v4(), 13));
+
+        for (;;)
+        {
+            tcp::socket socket(io_service);
+            acceptor.accept(socket);
+            std::string message("test");
+
+            boost::system::error_code ignored_error;
+            boost::asio::write(socket, boost::asio::buffer(message), ignored_error);
+        }
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+    }
+
 	RenderTarget_GlfwWindow::WindowHints windowHints = {
 		RenderTarget_GlfwWindow::WindowHint(GLFW_SAMPLES, 4),
 		RenderTarget_GlfwWindow::WindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API),

@@ -16,6 +16,23 @@ include_directories(${BAMBOO_LIB}/include)
 include_directories("include/")
 include_directories("src/")
 
+# Add boost
+
+if (WIN32)
+  set(BOOST_ROOT "D:/Development/Common-Externals/boost_1_63_0_msvc140-x64/")
+  set(Boost_LIBRARY_DIRS "D:/Development/Common-Externals/boost_1_63_0_msvc140-x64/lib64-msvc-14.0")
+endif()
+
+set(Boost_USE_STATIC_LIBS OFF) 
+set(Boost_USE_MULTITHREADED ON)  
+set(Boost_USE_STATIC_RUNTIME OFF) 
+find_package(Boost 1.60.0 REQUIRED) 
+
+if(Boost_FOUND)
+  include_directories(${Boost_INCLUDE_DIRS})
+  link_directories(${Boost_LIBRARY_DIRS})
+endif()
+
 # Add paths for GLEW
 find_package(GLEW REQUIRED)
 include_directories(${GLEW_INCLUDE_DIR})
@@ -65,7 +82,7 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ENABLE_CXX11}")
 #SET_TARGET_PROPERTIES(BambooEngine PROPERTIES DEBUG_POSTFIX "_d")
 add_executable(BambooEngine ${ALL_FILES_f} ${HEADER_FILES})
 
-target_link_libraries(BambooEngine glfw opengl32 ${GLFW_LIBRARIES} ${GLEW_LIBRARY})
+target_link_libraries(BambooEngine glfw opengl32 ${GLFW_LIBRARIES} ${GLEW_LIBRARY} ${Boost_LIBRARIES})
 
 add_custom_command(TARGET BambooEngine POST_BUILD        # Adds a post-build event to MyTest
     COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake - E copy_if_different..."
