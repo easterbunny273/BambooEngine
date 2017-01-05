@@ -7,7 +7,7 @@
 
 cmake_minimum_required(VERSION 3.6)
 
-set(CMAKE_SUPPRESS_REGENERATION true)
+#set(CMAKE_SUPPRESS_REGENERATION true)
 
 project (BambooEngine)
 
@@ -94,7 +94,7 @@ set (SOURCE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src)
 file(GLOB_RECURSE ALL_FILES RELATIVE ${SOURCE_DIRECTORY} "src/*.cpp" "src/*.h")
 file(GLOB_RECURSE ALL_FILES_f ${SOURCE_DIRECTORY} "src/*.cpp" "src/*.h")
 
-MESSAGE("DBG ALL_FILES=${ALL_FILES}")
+#MESSAGE("DBG ALL_FILES=${ALL_FILES}")
 
 foreach(FILE ${ALL_FILES}) 
   get_filename_component(PARENT_DIR "${FILE}" PATH)
@@ -111,7 +111,7 @@ foreach(FILE ${ALL_FILES})
   #  set(GROUP "Header Files\\${GROUP}")
   #endif()
 
-  MESSAGE("DBG GROUP=${GROUP}, FOO=${FILE}, ${FULL_FILENAME}")
+  #MESSAGE("DBG GROUP=${GROUP}, FOO=${FILE}, ${FULL_FILENAME}")
 
   source_group("Source Files\\${GROUP}" FILES "${FULL_FILENAME}")
 endforeach()
