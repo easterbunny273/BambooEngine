@@ -37,6 +37,9 @@ bamboo::NetworkServer::NetworkServer(boost::asio::ip::tcp::acceptor &&acceptor, 
 
 bamboo::NetworkServer::~NetworkServer()
 {
+	std::lock_guard<std::mutex> guard1(m_activeSocketsMutex);
+	std::lock_guard<std::mutex> guard2(m_connectionVectorMutex);
+
 	m_exiting = true;
 
 	m_acceptor.close();
