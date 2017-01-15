@@ -5,6 +5,7 @@
 #include <sstream>
 #include <time.h>
 #include <cassert>
+#include <shared_mutex>
 
 using namespace bamboo;
 
@@ -20,16 +21,16 @@ std::unique_ptr<Logger::FileSink> Logger::FileSink::create(std::string filename,
 
 void bamboo::Logger::attachSink(std::unique_ptr<ISink> &&sink, LogLevel lowerThreshold /*= LogLevel::DebugInfo*/, LogLevel upperThreshold /*= LogLevel::Fatal*/)
 {
-	std::lock_guard<std::mutex> guard(m_modifySinksMutex);
+	std::unique_lock<std::shared_mutex> guard(m_modifySinksMutex);
 
 	assert(lowerThreshold <= upperThreshold);
 
 	m_sinks.emplace_back(std::move(sink), lowerThreshold, upperThreshold);
 }
 
-void bamboo::Logger::logMessage(LogLevel level, const std::string &message)
+void bamboo::Logger::log(LogLevel level, const std::string &message)
 {
-	std::lock_guard<std::mutex> guard(m_modifySinksMutex);
+	std::shared_lock<std::shared_mutex> guard(m_modifySinksMutex);
 
 	for (auto &sinkInfo : m_sinks)
 	{
@@ -44,7 +45,7 @@ void bamboo::Logger::logMessage(LogLevel level, const std::string &message)
 
 void bamboo::Logger::flush()
 {
-	std::lock_guard<std::mutex> guard(m_modifySinksMutex);
+	std::shared_lock<std::shared_mutex> guard(m_modifySinksMutex);
 
 	for (auto &sinkInfo : m_sinks)
 		sinkInfo.sink->getStream() << std::flush;

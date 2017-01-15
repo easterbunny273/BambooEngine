@@ -9,6 +9,7 @@
 #include <iostream>
 #include <vector>
 #include <mutex>
+#include <shared_mutex>
 
 namespace bamboo
 {
@@ -65,7 +66,7 @@ namespace bamboo
 
 		void attachSink(std::unique_ptr<ISink> &&sink, LogLevel lowerThreshold = LogLevel::DebugInfo, LogLevel upperThreshold = LogLevel::Fatal);
 
-		void logMessage(LogLevel level, const std::string &message);
+		void log(LogLevel level, const std::string &message);
 		void flush();
 
 	private:
@@ -81,7 +82,7 @@ namespace bamboo
 		};
 
 		std::vector<TAttachedSink>	m_sinks;
-		std::mutex					m_modifySinksMutex;
+		std::shared_mutex			m_modifySinksMutex;
 		std::mutex					m_logMutex;
 	};
 
