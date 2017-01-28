@@ -1,24 +1,30 @@
 #ifndef __BAMBOO_CORE_H_
 #define __BAMBOO_CORE_H_
 
+#include "utils/Profiler.h"
+#include "utils/Config.h"
+
+#include <spdlog/spdlog.h>
+
 #include <memory>
 
 namespace bamboo
 {
-	class Logger;
-	class Profiler;
+	class CoreConfig;
 
 	class Core
 	{
 	public:
 		Core();
 
-		Logger& getLogger() const { return *m_defaultLogger; }
-		Profiler& getProfiler() const { return *m_profiler; }
+		auto getLogger() const			{ return m_defaultLogger; }
+		Profiler& getProfiler() const	{ return *m_profiler; }
+		CoreConfig& getConfig() const		{ return *m_config; }
 
 	private:
-		std::unique_ptr<Logger>		m_defaultLogger;
-		std::unique_ptr<Profiler>	m_profiler;
+		std::shared_ptr<spdlog::logger>		m_defaultLogger;
+		std::unique_ptr<Profiler>			m_profiler;
+		std::unique_ptr<CoreConfig>			m_config;
 	};
 };
 

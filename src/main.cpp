@@ -3,72 +3,43 @@
 #include "Network/NetworkServer.h"
 #include "Network/CommandStreamHandler.h"
 
-#include "utils/Profiler.h"
 #include "utils/Logger.h"
 #include "Core.h"
 
-void testFunction2(bamboo::Core &core)
+auto startNetworkServer(bamboo::Core &core)
 {
-	auto profileGuard = core.getProfiler().functionProfiling(__FUNCTION__);
+	auto handleCreator = std::make_shared<bamboo::CommandStreamHandlerFactory>();
+	auto port = core.getConfig().network.serverPort.value();
 
-	Sleep(4);
-}
-
-void testFunction3(bamboo::Core &core)
-{
-	auto profileGuard = core.getProfiler().functionProfiling(__FUNCTION__);
-
-	Sleep(3);
-
-	testFunction2(core);
-}
-
-void testFunction(bamboo::Core &core)
-{
-	auto profileGuard = core.getProfiler().functionProfiling(__FUNCTION__);
+	bool createServer = (port > 0);
+	auto networkServer = createServer ? bamboo::NetworkServer::create(port, handleCreator) : nullptr;
 	
-	for (int i = 0; i < 10; i++)
-		testFunction2(core);
+	if (networkServer)
+		core.getLogger()->info("Listening on port {}", port);
+	else if (createServer)
+		core.getLogger()->error("Could not open network server at port {}", port);
 
-	for (int i = 0; i < 20; i++)
-		testFunction3(core);
+	return networkServer;
 }
 
 int main(int argc, char **argv)
 {
 	bamboo::Core core;
+	core.getLogger()->info("starting up");
 
-	core.getLogger().log(bamboo::Logger::LogLevel::Info, "testLog");
-
-	for (int j = 0; j < 10; ++j)
-	{
-		auto profileGuard = core.getProfiler().functionProfiling(__FUNCTION__);
-		testFunction(core);
-	}
+	auto networkServer = startNetworkServer(core);
 	
-
-	core.getProfiler().debugHierarchical();
-
-	auto test = core.getProfiler();
-	(void)test;
-	
-
-	auto handleCreator = std::make_shared<bamboo::CommandStreamHandlerFactory>();
-
+	bool shouldExit = false;
+	while (shouldExit == false)
 	{
-		auto test = bamboo::NetworkServer::create(1200, handleCreator);
+		std::string buffer;
+		std::cin >> buffer;
 
-		char wait;
-		std::cin >> wait;
+		if (buffer == "exit")
+			shouldExit = true;
 	}
-	
-	{
-		auto test = bamboo::NetworkServer::create(1200, handleCreator);
 
-		char wait;
-		std::cin >> wait;
-	}
+	core.getLogger()->info("shutting down");
 
 	return 0;
-
 }

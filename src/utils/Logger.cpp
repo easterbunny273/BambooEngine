@@ -1,5 +1,7 @@
 #include "Logger.h"
 
+#ifdef __BAMBOOENGINE_LOGGER_H_
+
 #include <chrono>
 #include <iomanip>
 #include <sstream>
@@ -116,3 +118,6 @@ std::ostream& bamboo::Logger::StandardErrorSink::getStream()
 {
 	return std::cerr;
 }
+
+
+#endif

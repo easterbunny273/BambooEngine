@@ -1,3 +1,7 @@
+// replaced by spdlog
+
+#if 0
+
 #pragma once
 
 #ifndef __BAMBOOENGINE_LOGGER_H_
@@ -87,5 +91,14 @@ namespace bamboo
 	};
 
 }
+
+
+// EXAMPLE:
+/*m_defaultLogger = std::make_unique<bamboo::Logger>();
+m_defaultLogger->attachSink(bamboo::Logger::StandardOutputSink::create(), Logger::LogLevel::DebugInfo, Logger::LogLevel::Warning);
+m_defaultLogger->attachSink(bamboo::Logger::StandardErrorSink::create(), Logger::LogLevel::Error, Logger::LogLevel::Fatal);
+m_defaultLogger->attachSink(bamboo::Logger::FileSink::create("default.log"));*/
+
+#endif
 
 #endif
