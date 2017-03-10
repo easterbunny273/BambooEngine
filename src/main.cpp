@@ -8,7 +8,7 @@
 
 auto startNetworkServer(bamboo::Core &core)
 {
-	auto handleCreator = std::make_shared<bamboo::CommandStreamHandlerFactory>();
+	auto handleCreator = std::make_shared<bamboo::NodeTestStreamHandlerFactory>();
 	auto port = core.getConfig().network.serverPort.value();
 
 	bool createServer = (port > 0);
