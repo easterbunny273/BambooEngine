@@ -22,7 +22,7 @@ auto startNetworkServer(bamboo::Core &core)
 	return networkServer;
 }
 
-int main(int argc, char **argv)
+int main_(int argc, char **argv)
 {
 	bamboo::Core core;
 	core.getLogger()->info("starting up");

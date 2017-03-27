@@ -22,7 +22,7 @@ public:
     std::shared_ptr<bamboo::nodes::Node> clone() const override { return std::make_shared<TestPrintNode>(m_name); }
 };
 
-int main3(int argc, char ** argv)
+int main(int argc, char ** argv)
 {
     bamboo::nodes::NodeFactory nodeFactory;
     nodeFactory.registerPrototype(std::make_shared<TestSumNode>("prototype2"));

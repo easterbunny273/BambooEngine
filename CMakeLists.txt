@@ -48,7 +48,7 @@ enable_testing()
 # Unit Tests
 ################################
 # Add test cpp file
-add_executable( runUnitTests tests/testgtest.cpp )
+add_executable( runUnitTests tests/testgtest.cpp tests/TestNodes_basics.cpp tests/TestNodes.cpp src/Nodes/nodes.cpp)
 # Link test executable against gtest & gtest_main
 target_link_libraries(runUnitTests gtest gtest_main)
 add_test(runUnitTests runUnitTests)

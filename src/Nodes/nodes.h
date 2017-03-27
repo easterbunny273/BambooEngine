@@ -1,9 +1,8 @@
 #include <vector>
 #include <typeinfo>
 #include <memory>
+#include <map>
 #include <unordered_map>
-
-#include <boost/optional.hpp>
 
 namespace bamboo
 {
@@ -45,6 +44,88 @@ namespace bamboo
             TypedOutputDescriptor(const std::string &name) : OutputDescriptor(name, typeid(T).hash_code()) {}
         };
 
+        class IVariable
+        {
+        public:
+            IVariable(size_t typeHash) : m_typeHash(typeHash) {};
+            size_t typeHash() const { return m_typeHash; }
+            virtual ~IVariable() {};
+
+        protected:
+            const size_t      m_typeHash;
+        };
+
+        template <class T> class TypedVariable : public IVariable
+        {
+        public:
+            TypedVariable() : IVariable(typeid(T).hash_code()) {};
+
+            T get() const { return m_value; };
+            void set(T value) { m_value = value; };
+
+        private:
+            T m_value;
+        };
+
+        class SharedVariableMap
+        {
+        public:
+            template <typename T> std::shared_ptr<TypedVariable<T>> create(const std::string &name) { m_variables[name] = std::make_shared<TypedVariable<T>>(); return get<T>(name); }
+
+            void set(const std::string &name, std::shared_ptr<IVariable> &v) { m_variables[name] = v; }
+
+            std::shared_ptr<IVariable> get(const std::string& name) { 
+                auto iter = m_variables.find(name);
+                if (iter != m_variables.end())
+                    return iter->second;
+                else
+                    return nullptr;
+            };
+
+            template <typename T> std::shared_ptr<TypedVariable<T>> get(const std::string &name) {
+                auto untyped_variable = get(name);
+                return std::dynamic_pointer_cast<TypedVariable<T>>(untyped_variable);
+            }
+
+        private:
+            std::map<std::string, std::shared_ptr<IVariable>> m_variables;
+        };
+
+        class Inputs
+        {
+        public:
+            Inputs(std::shared_ptr<SharedVariableMap> wrappedMap) : m_variables(wrappedMap) {};
+            Inputs(std::unique_ptr<SharedVariableMap> &&wrappedMap) : m_variables(std::move(wrappedMap)) {};
+
+            template <typename T> T get(const std::string &name) const
+            {
+                auto typed_variable_object = m_variables->get<T>(name);
+
+                return typed_variable_object->get();
+            }
+
+        private:
+            std::shared_ptr<SharedVariableMap> m_variables;
+        };
+
+        class Outputs
+        {
+        public:
+            Outputs(std::shared_ptr<SharedVariableMap> wrappedMap) : m_variables(wrappedMap) {};
+
+            template <typename T> void set(const std::string &name, const T &value) const
+            {
+                auto typed_variable_object = m_variables->get(name);
+
+                typed_variable_object->set(value);
+            }
+
+        private:
+            std::shared_ptr<SharedVariableMap> m_variables;
+        };
+
+
+
         class Node {
         public:
             const auto& getInputs() const { return m_inputs; };
@@ -58,6 +139,8 @@ namespace bamboo
             std::string getNodeType() const { return m_nodeType; }
 
             virtual std::shared_ptr<Node> clone() const = 0;
+            
+           // virtual bool execute(const Inputs &in, Outputs &out) = 0;
 
         protected:
             Node(const std::string &name, const std::string &nodeType, std::vector<InputDescriptor> inputs, std::vector<OutputDescriptor> outputs) : m_name(name), m_nodeType(nodeType), m_inputs(inputs), m_outputs(outputs) {};
@@ -87,6 +170,29 @@ namespace bamboo
             std::vector<std::shared_ptr<Node>>      m_registeredPrototypes;
         };
 
+        class NodeGraph;
+
+        class NodeGraphEvaluationContext
+        {
+        public:
+            NodeGraphEvaluationContext(std::shared_ptr<NodeGraph> graph) : m_nodeGraph(graph) {};
+
+            //template <typename T> bool setDirectInput(nodeID node, std::string inputName, T value);
+            //template <typename T> T getOutput(nodeID node, std::string outputName);
+
+            bool hasDirectInput(nodeID node, std::string inputName);
+           
+            std::vector<bamboo::nodes::nodeID> getEvaluationOrder();
+
+            bool evaluate();
+
+        private:
+
+            std::shared_ptr<NodeGraph>                           m_nodeGraph;
+            std::map<nodeID, std::shared_ptr<SharedVariableMap>> m_directInputs;
+            std::map<nodeID, std::shared_ptr<SharedVariableMap>> m_outputVariablesPerNode;
+
+        };
 
         class NodeGraph {
         public:
@@ -97,12 +203,12 @@ namespace bamboo
                 return newID;
             };
 
-            boost::optional<nodeID> createNodeFromPrototype(std::string name, NodeFactory &factory, std::string typeName) {
+            nodeID createNodeFromPrototype(std::string name, NodeFactory &factory, std::string typeName) {
                 auto newID = getNextFreeNodeID();
                 auto newNode = factory.createNodeFromPrototype(typeName);
 
                 if (!newNode)
-                    return boost::optional<nodeID>();
+                    return 0;
 
                 m_nodes[newID] = newNode;
             }
@@ -113,26 +219,30 @@ namespace bamboo
                 nodeID dstNode, const std::string &dstInput);
 
             
-            boost::optional<Connection> getConnection(nodeID dstNode, const std::string &dstInput);
+            std::shared_ptr<Connection> getConnection(nodeID dstNode, const std::string &dstInput);
             std::vector<Connection> getInputConnections(nodeID dstNode);
             std::vector<Connection> getOutputConnections(nodeID srcNode);
             std::vector<Connection> getConnections(nodeID node);
 
+            bool hasConnection(nodeID dstNode, const std::string &dstInput);
             bool removeConnection(nodeID dstNode, const std::string &dstInput);
             bool removeConnections(nodeID node);
 
             std::shared_ptr<Node> getNode(nodeID _nodeID) const;
+            auto getNodes() const { return m_nodes; }
 
             std::string writeToJSON();
             static std::shared_ptr<NodeGraph> readFromJSON(const std::string &json, NodeFactory &factory);
 
         private:
-            nodeID getNextFreeNodeID() { static nodeID TEST = 0;  return TEST++; }
+            nodeID getNextFreeNodeID() { static nodeID TEST = 1;  return TEST++; }
 
 
             std::unordered_map<nodeID, std::shared_ptr<Node>> m_nodes;
 
             std::vector<Connection> m_connections;
         };
+
+
     }
 }

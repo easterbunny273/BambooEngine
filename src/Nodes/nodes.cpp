@@ -1,7 +1,11 @@
 #include <algorithm>
 #include <cassert>
+#include <deque>
+#include <set>
+#include <list>
 
 #include "Nodes/nodes.h"
+
 
 bool bamboo::nodes::NodeGraph::removeNode(nodeID node)
 {
@@ -47,15 +51,19 @@ bool bamboo::nodes::NodeGraph::setConnection(nodeID srcNode, const std::string &
     return correctType;
 }
 
-boost::optional<bamboo::nodes::Connection> bamboo::nodes::NodeGraph::getConnection(nodeID dstNode, const std::string &dstInput)
+
+std::shared_ptr<bamboo::nodes::Connection> bamboo::nodes::NodeGraph::getConnection(nodeID dstNode, const std::string &dstInput)
 {
     for (auto connection : m_connections)
     {
         if (connection.m_dstNode == dstNode && dstInput == connection.m_dstInput)
-            return boost::optional<bamboo::nodes::Connection>(connection);
+        {
+            return std::make_shared<Connection>(connection);
+        }
+            
     }
 
-    return {};
+    return nullptr;
 }
 
 std::vector<bamboo::nodes::Connection> bamboo::nodes::NodeGraph::getInputConnections(nodeID dstNode)
@@ -96,6 +104,17 @@ std::vector<bamboo::nodes::Connection> bamboo::nodes::NodeGraph::getConnections(
     }
 
     return result;
+}
+
+bool bamboo::nodes::NodeGraph::hasConnection(nodeID dstNode, const std::string &dstInput)
+{
+    for (auto connection : m_connections)
+    {
+        if (connection.m_dstNode == dstNode && dstInput == connection.m_dstInput)
+            return true;
+    }
+
+    return false;
 }
 
 bool bamboo::nodes::NodeGraph::removeConnection(nodeID dstNode, const std::string &dstInput)
@@ -197,4 +216,98 @@ std::shared_ptr<bamboo::nodes::Node> bamboo::nodes::NodeFactory::createNodeFromP
     }
 
     return nullptr;
+}
+
+bool bamboo::nodes::NodeGraphEvaluationContext::hasDirectInput(nodeID _nodeID, std::string inputName)
+{
+    auto iter = m_directInputs.find(_nodeID);
+    if (iter == m_directInputs.end())
+        return false;
+
+    if (iter->second == nullptr)
+        return false;
+
+    auto untyped_variable = iter->second->get(inputName);
+
+    if (untyped_variable == nullptr)
+        return false;
+
+    auto givenType = untyped_variable->typeHash();
+
+    auto node = m_nodeGraph->getNode(_nodeID);
+    assert(node);
+
+    if (!node)
+        return false;
+
+    auto input = node->getInput(inputName);
+    if (!input)
+        return false;
+
+    auto wantedType = input->getTypeHash();
+
+    return (givenType == wantedType);
+}
+
+std::vector<bamboo::nodes::nodeID> bamboo::nodes::NodeGraphEvaluationContext::getEvaluationOrder()
+{
+    std::deque<nodeID> evaluationQueue;
+
+    auto nodes = m_nodeGraph->getNodes();
+
+    std::list<std::pair<nodeID, std::shared_ptr<nodes::Node>>> nodesToCheck;
+    //nodesToCheck.reserve(nodes.size());
+
+    for (auto &node_iter : nodes)
+    {
+        auto id = node_iter.first;
+        auto node = node_iter.second;
+
+        nodesToCheck.push_back(std::make_pair(id, node));
+    }
+
+    for (auto node_iter = nodesToCheck.begin(); node_iter != nodesToCheck.end(); ++node_iter)
+    {
+        auto id = node_iter->first;
+        auto node = node_iter->second;
+
+        auto inputsForNode = node->getInputs();
+
+        evaluationQueue.push_front(id);
+
+        for (auto &input : inputsForNode)
+        {
+            auto connection = m_nodeGraph->getConnection(id, input.getName());
+
+            if (connection)
+                nodesToCheck.push_back(std::make_pair(connection->m_srcNode, m_nodeGraph->getNode(connection->m_srcNode)));
+
+            bool directInput = hasDirectInput(id, input.getName());
+
+            if (!directInput && !connection)
+                throw std::runtime_error("wrong nodegraph configuration");
+
+            if (directInput && connection)
+                throw std::runtime_error("wrong nodegraph configuration");
+        }
+    }
+
+    std::vector<nodeID> uniqueEvaluationOrderForNodes;
+    std::set<nodeID> handledNodes;
+
+    for (auto &node_id : evaluationQueue)
+    {
+        if (handledNodes.find(node_id) != handledNodes.end())
+            continue;
+
+        uniqueEvaluationOrderForNodes.push_back(node_id);
+        handledNodes.insert(node_id);
+    }
+
+    return uniqueEvaluationOrderForNodes;
+}
+
+bool bamboo::nodes::NodeGraphEvaluationContext::evaluate()
+{
+    return false;
 }
