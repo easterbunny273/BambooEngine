@@ -178,8 +178,8 @@ const bamboo::nodes::OutputDescriptor* bamboo::nodes::Node::getOutput(const std:
 {
     for (auto &output : m_outputs)
     {
-        if (output.getName() == name)
-            return &output;
+        if (output->getName() == name)
+            return output.get();
     }
 
     return nullptr;
@@ -290,6 +290,10 @@ std::vector<bamboo::nodes::nodeID> bamboo::nodes::NodeGraphEvaluationContext::ge
             if (directInput && connection)
                 throw std::runtime_error("wrong nodegraph configuration");
         }
+
+        // TODO: do a better check for cyclic graphs!
+        if (nodesToCheck.size() > 4096)
+            throw std::runtime_error("cyclic nodegraph configuration?");
     }
 
     std::vector<nodeID> uniqueEvaluationOrderForNodes;
@@ -309,5 +313,71 @@ std::vector<bamboo::nodes::nodeID> bamboo::nodes::NodeGraphEvaluationContext::ge
 
 bool bamboo::nodes::NodeGraphEvaluationContext::evaluate()
 {
-    return false;
+    auto evaluationOrder = getEvaluationOrder();
+
+    for (auto &item : evaluationOrder)
+    {
+        auto node = m_nodeGraph->getNode(item);
+
+        auto map1 = std::make_shared<bamboo::nodes::SharedVariableMap>();
+        auto map2 = std::make_shared<bamboo::nodes::SharedVariableMap>();
+
+        bamboo::nodes::Inputs inputs (map1);
+        bamboo::nodes::Outputs outputs (map2);
+
+        auto inputsForNode = node->getInputs();
+        auto outputsForNode = node->getOutputs();
+
+        
+
+        for (const auto &input : inputsForNode)
+        {
+            const auto &name = input.getName();
+
+            if (hasDirectInput(item, name))
+            {
+                auto variable = m_directInputs[item]->get(name);
+                map1->set(name, variable);
+            }
+            else
+            {
+                auto inputConnection = m_nodeGraph->getConnection(item, name);
+                auto inputVariable = m_outputVariablesPerNode[inputConnection->m_srcNode]->get(inputConnection->m_srcOutput);
+                map1->set(name, inputVariable);
+            }
+        }
+
+        for (const auto &output : outputsForNode)
+        {
+            const auto &name = output->getName();
+
+            auto &variablesForNode = m_outputVariablesPerNode[item];
+
+            if (!variablesForNode)
+            {
+                auto newMap = std::make_shared<SharedVariableMap>();
+                m_outputVariablesPerNode[item] = newMap;
+                variablesForNode = newMap;
+            }
+
+            auto foundVariable = variablesForNode->get(name);
+            if (foundVariable == nullptr)
+            {
+                auto newVariable = output->createVariable();
+                variablesForNode->set(name, newVariable);
+
+                foundVariable = newVariable;
+            }         
+
+            map2->set(name, foundVariable);
+        }
+
+
+        auto result = node->execute(inputs, outputs);
+
+        if (!result)
+            return false;
+    }
+
+    return true;
 }

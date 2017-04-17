@@ -3,12 +3,36 @@
 #include <memory>
 #include <map>
 #include <unordered_map>
+#include <cassert>
 
 namespace bamboo
 {
     namespace nodes
     {
         using nodeID = size_t;
+
+        class IVariable
+        {
+        public:
+            IVariable(size_t typeHash) : m_typeHash(typeHash) {};
+            size_t typeHash() const { return m_typeHash; }
+            virtual ~IVariable() {};
+
+        protected:
+            const size_t      m_typeHash;
+        };
+
+        template <class T> class TypedVariable : public IVariable
+        {
+        public:
+            TypedVariable() : IVariable(typeid(T).hash_code()) {};
+
+            T get() const { return m_value; };
+            void set(T value) { m_value = value; };
+
+        private:
+            T m_value;
+        };
 
         class DescriptorBase {
         public:
@@ -36,35 +60,21 @@ namespace bamboo
         class OutputDescriptor : public DescriptorBase {
         public:
             OutputDescriptor(const std::string &name, size_t typeHash) : DescriptorBase(name, typeHash) {};
+
+            std::shared_ptr<IVariable> createVariable() const { return createTypedVariable(); }
+
+        protected:
+            virtual std::shared_ptr<IVariable> createTypedVariable() const { assert(!"do not call base type"); return nullptr; };
         };
 
         template <class T> class TypedOutputDescriptor : public OutputDescriptor
         {
         public:
             TypedOutputDescriptor(const std::string &name) : OutputDescriptor(name, typeid(T).hash_code()) {}
-        };
-
-        class IVariable
-        {
-        public:
-            IVariable(size_t typeHash) : m_typeHash(typeHash) {};
-            size_t typeHash() const { return m_typeHash; }
-            virtual ~IVariable() {};
+            static std::shared_ptr<TypedOutputDescriptor<T>> create(const std::string &name) { return std::make_shared<TypedOutputDescriptor<T>>(name); }
 
         protected:
-            const size_t      m_typeHash;
-        };
-
-        template <class T> class TypedVariable : public IVariable
-        {
-        public:
-            TypedVariable() : IVariable(typeid(T).hash_code()) {};
-
-            T get() const { return m_value; };
-            void set(T value) { m_value = value; };
-
-        private:
-            T m_value;
+            std::shared_ptr<IVariable> createTypedVariable() const override final { return std::make_shared<TypedVariable<T>>(); };
         };
 
         class SharedVariableMap
@@ -115,7 +125,7 @@ namespace bamboo
 
             template <typename T> void set(const std::string &name, const T &value) const
             {
-                auto typed_variable_object = m_variables->get(name);
+                auto typed_variable_object = m_variables->get<T>(name);
 
                 typed_variable_object->set(value);
             }
@@ -140,15 +150,16 @@ namespace bamboo
 
             virtual std::shared_ptr<Node> clone() const = 0;
             
-           // virtual bool execute(const Inputs &in, Outputs &out) = 0;
+            virtual bool execute(const Inputs &in, Outputs &out) const { assert(!"execute method not overwritten"); return false; };
 
         protected:
-            Node(const std::string &name, const std::string &nodeType, std::vector<InputDescriptor> inputs, std::vector<OutputDescriptor> outputs) : m_name(name), m_nodeType(nodeType), m_inputs(inputs), m_outputs(outputs) {};
+            Node(const std::string &name, const std::string &nodeType, std::vector<InputDescriptor> inputs, std::vector<std::shared_ptr<OutputDescriptor>> outputs) : m_name(name), m_nodeType(nodeType), m_inputs(inputs), m_outputs(outputs) {};
 
             std::string       m_name;
             const std::string m_nodeType;
             const std::vector<InputDescriptor>    m_inputs;
-            const std::vector<OutputDescriptor>   m_outputs;
+            //const std::vector<OutputDescriptor>   m_outputs;
+            const std::vector<std::shared_ptr<OutputDescriptor>> m_outputs;
         };
 
         class Connection 
