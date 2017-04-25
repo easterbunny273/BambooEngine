@@ -6936,7 +6936,7 @@ namespace nlohmann
                         thousands_sep);
                     std::fill(end, number_buffer.end(), '\0');
                     assert((end - number_buffer.begin()) <= len);
-                    len = (end - number_buffer.begin());
+                    len = static_cast<long>(end - number_buffer.begin());
                 }
 
                 // convert decimal point to '.'

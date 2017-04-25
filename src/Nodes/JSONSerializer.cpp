@@ -26,8 +26,8 @@ std::string bamboo::nodes::NodeGraph::writeToJSON()
         for (auto &input : node->getInputs())
         {
             nlohmann::json ioRep;
-            ioRep["name"] = input.getName();
-            ioRep["typeHash"] = input.getTypeHash();
+            ioRep["name"] = input->getName();
+            ioRep["typeHash"] = input->getTypeHash();
 
             nodeRep["inputs"].push_back(ioRep);
         }

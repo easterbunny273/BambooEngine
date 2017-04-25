@@ -54,26 +54,29 @@ namespace bamboo
         template <class T> class TypedInputDescriptor : public InputDescriptor
         {
         public:
+            static std::shared_ptr<TypedInputDescriptor<T>> create(const std::string &name) { return std::shared_ptr<TypedInputDescriptor<T>>(new TypedInputDescriptor<T>(name)); }
+
+        protected:
             TypedInputDescriptor(const std::string &name) : InputDescriptor(name, typeid(T).hash_code()) {}
         };
 
         class OutputDescriptor : public DescriptorBase {
         public:
-            OutputDescriptor(const std::string &name, size_t typeHash) : DescriptorBase(name, typeHash) {};
-
             std::shared_ptr<IVariable> createVariable() const { return createTypedVariable(); }
 
         protected:
+            OutputDescriptor(const std::string &name, size_t typeHash) : DescriptorBase(name, typeHash) {};
+
             virtual std::shared_ptr<IVariable> createTypedVariable() const { assert(!"do not call base type"); return nullptr; };
         };
 
         template <class T> class TypedOutputDescriptor : public OutputDescriptor
         {
         public:
-            TypedOutputDescriptor(const std::string &name) : OutputDescriptor(name, typeid(T).hash_code()) {}
-            static std::shared_ptr<TypedOutputDescriptor<T>> create(const std::string &name) { return std::make_shared<TypedOutputDescriptor<T>>(name); }
+            static std::shared_ptr<TypedOutputDescriptor<T>> create(const std::string &name) { return std::shared_ptr<TypedOutputDescriptor<T>>(new TypedOutputDescriptor<T>(name)); }
 
         protected:
+            TypedOutputDescriptor(const std::string &name) : OutputDescriptor(name, typeid(T).hash_code()) {}
             std::shared_ptr<IVariable> createTypedVariable() const override final { return std::make_shared<TypedVariable<T>>(); };
         };
 
@@ -138,11 +141,14 @@ namespace bamboo
 
         class Node {
         public:
+            using InputDescriptorsVec = std::vector<std::shared_ptr<InputDescriptor>>;
+            using OutputDescriptorsVec = std::vector<std::shared_ptr<OutputDescriptor>>;
+
             const auto& getInputs() const { return m_inputs; };
             const auto& getOutputs() const { return m_outputs; }
 
-            const InputDescriptor* getInput(const std::string &name) const;
-            const OutputDescriptor* getOutput(const std::string &name) const;
+            const std::shared_ptr<InputDescriptor> getInput(const std::string &name) const;
+            const std::shared_ptr<OutputDescriptor> getOutput(const std::string &name) const;
 
             void setName(std::string name) { m_name = name; };
             std::string getName() const { return m_name; }
@@ -153,13 +159,13 @@ namespace bamboo
             virtual bool execute(const Inputs &in, Outputs &out) const { assert(!"execute method not overwritten"); return false; };
 
         protected:
-            Node(const std::string &name, const std::string &nodeType, std::vector<InputDescriptor> inputs, std::vector<std::shared_ptr<OutputDescriptor>> outputs) : m_name(name), m_nodeType(nodeType), m_inputs(inputs), m_outputs(outputs) {};
+            Node(const std::string &name, const std::string &nodeType, InputDescriptorsVec inputs, OutputDescriptorsVec outputs) : m_name(name), m_nodeType(nodeType), m_inputs(inputs), m_outputs(outputs) {};
 
             std::string       m_name;
             const std::string m_nodeType;
-            const std::vector<InputDescriptor>    m_inputs;
-            //const std::vector<OutputDescriptor>   m_outputs;
-            const std::vector<std::shared_ptr<OutputDescriptor>> m_outputs;
+
+            const InputDescriptorsVec   m_inputs;
+            const OutputDescriptorsVec  m_outputs;
         };
 
         class Connection 

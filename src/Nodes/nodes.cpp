@@ -163,23 +163,23 @@ std::shared_ptr<bamboo::nodes::Node> bamboo::nodes::NodeGraph::getNode(nodeID _n
     return iterator->second;
 }
 
-const bamboo::nodes::InputDescriptor* bamboo::nodes::Node::getInput(const std::string &name) const
+const std::shared_ptr<bamboo::nodes::InputDescriptor> bamboo::nodes::Node::getInput(const std::string &name) const
 {
     for (auto &input : m_inputs)
     {
-        if (input.getName() == name)
-            return &input;
+        if (input->getName() == name)
+            return input;
     }
 
     return nullptr;
 }
 
-const bamboo::nodes::OutputDescriptor* bamboo::nodes::Node::getOutput(const std::string &name) const
+const std::shared_ptr<bamboo::nodes::OutputDescriptor> bamboo::nodes::Node::getOutput(const std::string &name) const
 {
     for (auto &output : m_outputs)
     {
         if (output->getName() == name)
-            return output.get();
+            return output;
     }
 
     return nullptr;
@@ -277,12 +277,12 @@ std::vector<bamboo::nodes::nodeID> bamboo::nodes::NodeGraphEvaluationContext::ge
 
         for (auto &input : inputsForNode)
         {
-            auto connection = m_nodeGraph->getConnection(id, input.getName());
+            auto connection = m_nodeGraph->getConnection(id, input->getName());
 
             if (connection)
                 nodesToCheck.push_back(std::make_pair(connection->m_srcNode, m_nodeGraph->getNode(connection->m_srcNode)));
 
-            bool directInput = hasDirectInput(id, input.getName());
+            bool directInput = hasDirectInput(id, input->getName());
 
             if (!directInput && !connection)
                 throw std::runtime_error("wrong nodegraph configuration");
@@ -319,31 +319,30 @@ bool bamboo::nodes::NodeGraphEvaluationContext::evaluate()
     {
         auto node = m_nodeGraph->getNode(item);
 
-        auto map1 = std::make_shared<bamboo::nodes::SharedVariableMap>();
-        auto map2 = std::make_shared<bamboo::nodes::SharedVariableMap>();
-
-        bamboo::nodes::Inputs inputs (map1);
-        bamboo::nodes::Outputs outputs (map2);
+        auto inputMap = std::make_shared<bamboo::nodes::SharedVariableMap>();
+        auto outputMap = std::make_shared<bamboo::nodes::SharedVariableMap>();
 
         auto inputsForNode = node->getInputs();
-        auto outputsForNode = node->getOutputs();
-
-        
+        auto outputsForNode = node->getOutputs();      
 
         for (const auto &input : inputsForNode)
         {
-            const auto &name = input.getName();
+            const auto &name = input->getName();
 
             if (hasDirectInput(item, name))
             {
                 auto variable = m_directInputs[item]->get(name);
-                map1->set(name, variable);
+                inputMap->set(name, variable);
             }
             else
             {
                 auto inputConnection = m_nodeGraph->getConnection(item, name);
-                auto inputVariable = m_outputVariablesPerNode[inputConnection->m_srcNode]->get(inputConnection->m_srcOutput);
-                map1->set(name, inputVariable);
+                
+                auto outVariablesForSrcNode = m_outputVariablesPerNode[inputConnection->m_srcNode];
+                assert(outVariablesForSrcNode);
+
+                auto inputVariable = outVariablesForSrcNode->get(inputConnection->m_srcOutput);
+                inputMap->set(name, inputVariable);
             }
         }
 
@@ -369,10 +368,11 @@ bool bamboo::nodes::NodeGraphEvaluationContext::evaluate()
                 foundVariable = newVariable;
             }         
 
-            map2->set(name, foundVariable);
+            outputMap->set(name, foundVariable);
         }
 
-
+        bamboo::nodes::Inputs inputs(inputMap);
+        bamboo::nodes::Outputs outputs(outputMap);
         auto result = node->execute(inputs, outputs);
 
         if (!result)

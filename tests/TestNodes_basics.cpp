@@ -88,8 +88,8 @@ TEST(Nodes_EvaluationContext, EvaluationVector_Simple2)
     class TestSumNode : public bamboo::nodes::Node
     {
     public:
-        TestSumNode(std::string name) : bamboo::nodes::Node(name, "TestNode", { bamboo::nodes::TypedInputDescriptor<int>("input1"),
-            bamboo::nodes::TypedInputDescriptor<int>("input2") }, { bamboo::nodes::TypedOutputDescriptor<int>::create("sum") }) {};
+        TestSumNode(std::string name) : bamboo::nodes::Node(name, "TestNode", { bamboo::nodes::TypedInputDescriptor<int>::create("input1"),
+            bamboo::nodes::TypedInputDescriptor<int>::create("input2") }, { bamboo::nodes::TypedOutputDescriptor<int>::create("sum") }) {};
 
         std::shared_ptr<bamboo::nodes::Node> clone() const override { return std::make_shared<TestSumNode>(m_name); }
     };
@@ -107,8 +107,8 @@ TEST(Nodes_EvaluationContext, EvaluationVector_Simple3_CheckOrder)
     class TestSumNode : public bamboo::nodes::Node
     {
     public:
-        TestSumNode(std::string name) : bamboo::nodes::Node(name, "TestNode", { bamboo::nodes::TypedInputDescriptor<int>("input1"),
-            bamboo::nodes::TypedInputDescriptor<int>("input2") }, { bamboo::nodes::TypedOutputDescriptor<int>::create("sum") }) {};
+        TestSumNode(std::string name) : bamboo::nodes::Node(name, "TestNode", { bamboo::nodes::TypedInputDescriptor<int>::create("input1"),
+            bamboo::nodes::TypedInputDescriptor<int>::create("input2") }, { bamboo::nodes::TypedOutputDescriptor<int>::create("sum") }) {};
 
         std::shared_ptr<bamboo::nodes::Node> clone() const override { return std::make_shared<TestSumNode>(m_name); }
     };
@@ -154,15 +154,15 @@ TEST(Nodes_EvaluationContext, EvaluationVector_Simple4_CheckOrder)
     class TestSumNode : public bamboo::nodes::Node
     {
     public:
-        TestSumNode(std::string name) : bamboo::nodes::Node(name, "TestNode", { bamboo::nodes::TypedInputDescriptor<int>("input1"),
-            bamboo::nodes::TypedInputDescriptor<int>("input2") }, { bamboo::nodes::TypedOutputDescriptor<int>::create("sum") }) {};
+        TestSumNode(std::string name) : bamboo::nodes::Node(name, "TestNode", { bamboo::nodes::TypedInputDescriptor<int>::create("input1"),
+            bamboo::nodes::TypedInputDescriptor<int>::create("input2") }, { bamboo::nodes::TypedOutputDescriptor<int>::create("sum") }) {};
 
         std::shared_ptr<bamboo::nodes::Node> clone() const override { return std::make_shared<TestSumNode>(m_name); }
     };
     
     class TestPrintNode : public bamboo::nodes::Node {
     public:
-        TestPrintNode(std::string name) : bamboo::nodes::Node(name, "PrintIntNode", { bamboo::nodes::TypedInputDescriptor<int>("in") }, {  }) {};
+        TestPrintNode(std::string name) : bamboo::nodes::Node(name, "PrintIntNode", { bamboo::nodes::TypedInputDescriptor<int>::create("in") }, {  }) {};
 
         std::shared_ptr<bamboo::nodes::Node> clone() const override { return std::make_shared<TestPrintNode>(m_name); }
     };
@@ -210,7 +210,7 @@ TEST(Nodes_EvaluationContext, EvaluationVector_Simple5_CyclicReference)
 {
     class TestNode1 : public bamboo::nodes::Node {
     public:
-        TestNode1(std::string name) : bamboo::nodes::Node(name, "TestNode1", { bamboo::nodes::TypedInputDescriptor<int>("in") }, { bamboo::nodes::TypedOutputDescriptor<int>::create("out")  }) {};
+        TestNode1(std::string name) : bamboo::nodes::Node(name, "TestNode1", { bamboo::nodes::TypedInputDescriptor<int>::create("in") }, { bamboo::nodes::TypedOutputDescriptor<int>::create("out")  }) {};
 
         std::shared_ptr<bamboo::nodes::Node> clone() const override { return std::make_shared<TestNode1>(m_name); }
     };
@@ -218,7 +218,7 @@ TEST(Nodes_EvaluationContext, EvaluationVector_Simple5_CyclicReference)
     class TestNode2 : public bamboo::nodes::Node
     {
     public:
-        TestNode2(std::string name) : bamboo::nodes::Node(name, "TestNode2", { bamboo::nodes::TypedInputDescriptor<int>("in") }, { bamboo::nodes::TypedOutputDescriptor<int>::create("out") }) {};
+        TestNode2(std::string name) : bamboo::nodes::Node(name, "TestNode2", { bamboo::nodes::TypedInputDescriptor<int>::create("in") }, { bamboo::nodes::TypedOutputDescriptor<int>::create("out") }) {};
 
         std::shared_ptr<bamboo::nodes::Node> clone() const override { return std::make_shared<TestNode2>(m_name); }
     };
@@ -283,13 +283,13 @@ TEST(Nodes_EvaluationContext, SimpleEvaluation_2Nodes)
 
     class TestNode2 : public bamboo::nodes::Node {
     public:
-        TestNode2(std::string name) : bamboo::nodes::Node(name, "TestNode2", { bamboo::nodes::TypedInputDescriptor<int>("in")  }, {}) {};
+        TestNode2(std::string name) : bamboo::nodes::Node(name, "TestNode2", { bamboo::nodes::TypedInputDescriptor<int>::create("in")  }, {}) {};
 
         bool execute(const bamboo::nodes::Inputs &in, bamboo::nodes::Outputs &out) const override { std::cout << in.get<int>("in") << std::endl; return true; };
 
         std::shared_ptr<bamboo::nodes::Node> clone() const override { return std::make_shared<TestNode1>(m_name); }
     };
-
+     
     std::string testVariable("not executed");
 
     auto nodeGraph1 = std::make_shared<bamboo::nodes::NodeGraph>();

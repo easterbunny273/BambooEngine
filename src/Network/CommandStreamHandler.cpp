@@ -6,8 +6,8 @@
 class TestSumNode : public bamboo::nodes::Node
 {
 public:
-    TestSumNode(std::string name) : bamboo::nodes::Node(name, "TestNode", { bamboo::nodes::TypedInputDescriptor<int>("input1"),
-        bamboo::nodes::TypedInputDescriptor<int>("input2") }, { bamboo::nodes::TypedOutputDescriptor<int>::create("sum") }) {};
+    TestSumNode(std::string name) : bamboo::nodes::Node(name, "TestNode", { bamboo::nodes::TypedInputDescriptor<int>::create("input1"),
+        bamboo::nodes::TypedInputDescriptor<int>::create("input2") }, { bamboo::nodes::TypedOutputDescriptor<int>::create("sum") }) {};
 
     std::shared_ptr<bamboo::nodes::Node> clone() const override { return std::make_shared<TestSumNode>(m_name); }
 };
@@ -16,7 +16,7 @@ public:
 class TestPrintNode : public bamboo::nodes::Node
 {
 public:
-    TestPrintNode(std::string name) : bamboo::nodes::Node(name, "PrintNode", { bamboo::nodes::TypedInputDescriptor<int>("input") }, {}) {};
+    TestPrintNode(std::string name) : bamboo::nodes::Node(name, "PrintNode", { bamboo::nodes::TypedInputDescriptor<int>::create("input") }, {}) {};
 
     std::shared_ptr<bamboo::nodes::Node> clone() const override { return std::make_shared<TestPrintNode>(m_name); }
 };
