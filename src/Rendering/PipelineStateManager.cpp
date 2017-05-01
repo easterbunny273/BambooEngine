@@ -43,8 +43,8 @@ void PipelineStateManager::getRealStateFromGPU(PipelineState &object)
 	for (size_t i = 0; i < numDrawBuffers; ++i)
 	{
 		GLint srcFactor=-1, dstFactor=-1;
-		glGetIntegeri_v(GL_BLEND_SRC_RGB, i, &srcFactor);
-		glGetIntegeri_v(GL_BLEND_DST_RGB, i, &dstFactor);
+		glGetIntegeri_v(GL_BLEND_SRC_RGB, (GLuint)i, &srcFactor);
+		glGetIntegeri_v(GL_BLEND_DST_RGB, (GLuint)i, &dstFactor);
 		object.blendFunctions[i].sFactor = translateBlendFactor(srcFactor);
 		object.blendFunctions[i].dFactor = translateBlendFactor(dstFactor);
 	}

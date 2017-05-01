@@ -11,101 +11,12 @@ cmake_minimum_required(VERSION 3.6)
 
 project (BambooEngine)
 
-add_subdirectory(external/glfw)
-include_directories(external/glfw/include)
-
-include_directories(${BAMBOO_LIB}/include)
 include_directories("include/")
 include_directories("src/")
-
-## Add googletest
-# Download and unpack googletest at configure time
-configure_file(CMakeLists.txt.googletest.in googletest-download/CMakeLists.txt)
-execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-  RESULT_VARIABLE result
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
-if(result)
-  message(FATAL_ERROR "CMake step for googletest failed: ${result}")
-endif()
-execute_process(COMMAND ${CMAKE_COMMAND} --build .
-  RESULT_VARIABLE result
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
-if(result)
-  message(FATAL_ERROR "Build step for googletest failed: ${result}")
-endif()
-
-# Prevent overriding the parent project's compiler/linker
-# settings on Windows
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-
-# Add googletest directly to our build. This defines
-# the gtest and gtest_main targets.
-add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
-                 ${CMAKE_BINARY_DIR}/googletest-build)
-
-enable_testing()
-
-################################
-# Unit Tests
-################################
-# Add test cpp file
-add_executable( runUnitTests tests/testgtest.cpp tests/TestNodes_basics.cpp tests/TestNodes.cpp src/Nodes/nodes.cpp)
-set_property(TARGET runUnitTests PROPERTY CXX_STANDARD 17)
-set_target_properties(runUnitTests PROPERTIES COMPILE_FLAGS "/std:c++latest")
-set_target_properties(runUnitTests PROPERTIES COMPILE_DEFINITIONS "GTEST_LANG_CXX11")
-
-# Link test executable against gtest & gtest_main
-target_link_libraries(runUnitTests gtest gtest_main)
-add_test(runUnitTests runUnitTests)
-
-## Add boost
-if (WIN32)
-  set(BOOST_ROOT "D:/Development/Common-Externals/boost_1_64_0")
-  set(BOOST_LIBRARYDIR "D:/Development/Common-Externals/boost_1_64_0/lib64-msvc-14.1")
-  set(Boost_LIBRARY_DIRS "D:/Development/Common-Externals/boost_1_64_0/lib64-msvc-14.1")
-endif()
-
-set(Boost_USE_STATIC_LIBS OFF) 
-set(Boost_USE_MULTITHREADED ON)  
-set(Boost_USE_STATIC_RUNTIME OFF) 
-find_package(Boost 1.60.0 REQUIRED COMPONENTS system)
-
-if(Boost_FOUND)
-  include_directories(${Boost_INCLUDE_DIRS})
-  link_directories(${Boost_LIBRARY_DIRS})
-else()
-  message(FATAL_ERROR "Could not find boost." )
-endif()
-
-if (NOT WIN32)
-    # Add paths for GL
-    find_package(OpenGL REQUIRED)
-    include_directories(${OPENGL_INCLUDE_DIRS})
-    set(OPENGL_LINK_LIBRARIES ${OPENGL_LIBRARIES})
-    #message( FATAL_ERROR "You can not do this at all, CMake will exit." )
-else()
-    set(OPENGL_LINK_LIBRARIES "opengl32")
-endif()
-
-# Add paths for GLEW
-find_package(GLEW REQUIRED)
-include_directories(${GLEW_INCLUDE_DIR})
-
-if (GLEW_FOUND)
-  #find_library(GLEW_LIBRARY NAMES GLEW glew32 glew glew32s PATH_SUFFIXES lib64)
-  MESSAGE("found cmake, GLEW_INCLUDE_DIR=${GLEW_INCLUDE_DIR}, GLEW_LIBRARIES=${GLEW_LIBRARIES}")
-endif()
-
-# Add source/header files
-#file (GLOB HEADER_FILES "include/*.h")
-#aux_source_directory(src SOURCE_FILES)
-#source_group("Header Files" FILES ${HEADER_FILES})
 
 set (SOURCE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src)
 file(GLOB_RECURSE ALL_FILES RELATIVE ${SOURCE_DIRECTORY} "src/*.cpp" "src/*.h")
 file(GLOB_RECURSE ALL_FILES_f ${SOURCE_DIRECTORY} "src/*.cpp" "src/*.h")
-
-#MESSAGE("DBG ALL_FILES=${ALL_FILES}")
 
 foreach(FILE ${ALL_FILES}) 
   get_filename_component(PARENT_DIR "${FILE}" PATH)
@@ -128,33 +39,36 @@ foreach(FILE ${ALL_FILES})
 endforeach()
 
 
-# Make sure we get C++11
-#SET(ENABLE_CXX11 "-std=c++1y")
-#if(CMAKE_COMPILER_IS_GNUCXX)
-#   EXECUTE_PROCESS(COMMAND "${CMAKE_CXX_COMPILER} -dumpversion" OUTPUT_VARIABLE GCC_VERSION)
-#   if (GCC_VERSION VERSION_LESS 4.7)
-#      SET(ENABLE_CXX11 "-std=c++0x")
-#   endif()
-#endif()
-#SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
+################################
+# BambooEngine Project
+################################
 
-#SET_TARGET_PROPERTIES(BambooEngine PROPERTIES DEBUG_POSTFIX "_d")
 add_executable(BambooEngine ${ALL_FILES_f} ${HEADER_FILES})
 set_property(TARGET BambooEngine PROPERTY CXX_STANDARD 17)
 set_target_properties(BambooEngine PROPERTIES COMPILE_FLAGS "/std:c++latest")
-target_link_libraries(BambooEngine glfw ${OPENGL_LINK_LIBRARIES} ${Boost_LIBRARIES} GLEW::GLEW)
+#set_target_properties(BambooEngine PROPERTIES COMPILE_DEFINITIONS "_WIN32_WINDOWS")
+set_target_properties(BambooEngine PROPERTIES COMPILE_DEFINITIONS " _WIN32_WINNT=0x0501")
+ 
+include(external/glfw.cmake)
+include(external/googletest.cmake)
+include(external/boost.cmake)
+include(external/glew.cmake)
+include(external/opengl.cmake)
 
-if (WIN32)
-    add_custom_command(TARGET BambooEngine POST_BUILD        # Adds a post-build event to MyTest
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake - E copy_if_different..."
-            "${GLEW_INCLUDE_DIR}/../bin/Release/x64/glew32.dll"      # <--this is in-file
-            $<TARGET_FILE_DIR:BambooEngine>)                 # <--this is out-file path
-endif()
+################################
+# Unit Tests
+################################
 
-if (WIN32)
-    add_custom_command(TARGET BambooEngine POST_BUILD        # Adds a post-build event to MyTest
-        COMMAND ${CMAKE_COMMAND} -E copy_directory  # which executes "cmake - E copy_if_different..."
-            "${BOOST_LIBRARYDIR}"      # <--this is in-file
-            $<TARGET_FILE_DIR:BambooEngine>)                 # <--this is out-file path
-endif()
+enable_testing()
+
+# Add test cpp file
+add_executable( runUnitTests tests/testgtest.cpp tests/TestNodes_basics.cpp tests/TestNodes.cpp src/Nodes/nodes.cpp)
+set_property(TARGET runUnitTests PROPERTY CXX_STANDARD 17)
+set_target_properties(runUnitTests PROPERTIES COMPILE_FLAGS "/std:c++latest")
+set_target_properties(runUnitTests PROPERTIES COMPILE_DEFINITIONS "GTEST_LANG_CXX11")
+
+# Link test executable against gtest & gtest_main
+target_link_libraries(runUnitTests gtest gtest_main)
+add_test(runUnitTests runUnitTests)
+
