@@ -33,6 +33,21 @@ TEST(Nodes_SharedVariableMap, createAndReadIntVariable)
     EXPECT_EQ(typedVariable2->get(), 42);
 }
 
+TEST(Nodes_SharedVariableMap, createAndRemoveVariable)
+{
+    bamboo::nodes::SharedVariableMap test;
+
+    test.create<int>("int-value");
+
+    auto typedVariable1 = test.get<int>("int-value");
+    EXPECT_TRUE(typedVariable1 != nullptr);
+
+    test.remove("int-value");
+
+    auto typedVariable2 = test.get<int>("int-value");
+    EXPECT_FALSE(typedVariable2 != nullptr);
+}
+
 
 TEST(Nodes_SharedVariableMap, sharedVariables)
 {
@@ -41,7 +56,7 @@ TEST(Nodes_SharedVariableMap, sharedVariables)
 
     storage1.create<std::string>("variable2");
 
-    storage2.set("refedVariable2", storage1.get("variable2"));
+    storage2.replace("refedVariable2", storage1.get("variable2"));
 
     auto originalVariable = storage1.get<std::string>("variable2");
     originalVariable->set("hallo");
@@ -232,9 +247,7 @@ TEST(Nodes_EvaluationContext, EvaluationVector_Simple5_CyclicReference)
     nodeGraph1->setConnection(node1, "out", node2, "in");
     nodeGraph1->setConnection(node2, "out", node1, "in");
 
-    EXPECT_NO_THROW(evaluationContext->getEvaluationOrder());
-
-    int a = 3;
+    EXPECT_THROW(evaluationContext->getEvaluationOrder(), std::runtime_error);
 }
 
 TEST(Nodes_EvaluationContext, SimpleEvaluation)
@@ -305,5 +318,5 @@ TEST(Nodes_EvaluationContext, SimpleEvaluation_2Nodes)
     bool result = evaluationContext->evaluate();
 
     EXPECT_TRUE(result);
-    (void)node1;
+    (void)node1; 
 }

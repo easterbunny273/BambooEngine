@@ -163,7 +163,7 @@ std::shared_ptr<bamboo::nodes::Node> bamboo::nodes::NodeGraph::getNode(nodeID _n
     return iterator->second;
 }
 
-const std::shared_ptr<bamboo::nodes::InputDescriptor> bamboo::nodes::Node::getInput(const std::string &name) const
+const std::shared_ptr<bamboo::nodes::InputDescriptor> bamboo::nodes::Node::getInput(std::string_view name) const
 {
     for (auto &input : m_inputs)
     {
@@ -174,7 +174,7 @@ const std::shared_ptr<bamboo::nodes::InputDescriptor> bamboo::nodes::Node::getIn
     return nullptr;
 }
 
-const std::shared_ptr<bamboo::nodes::OutputDescriptor> bamboo::nodes::Node::getOutput(const std::string &name) const
+const std::shared_ptr<bamboo::nodes::OutputDescriptor> bamboo::nodes::Node::getOutput(std::string_view name) const
 {
     for (auto &output : m_outputs)
     {
@@ -332,7 +332,7 @@ bool bamboo::nodes::NodeGraphEvaluationContext::evaluate()
             if (hasDirectInput(item, name))
             {
                 auto variable = m_directInputs[item]->get(name);
-                inputMap->set(name, variable);
+                inputMap->replace(name, variable);
             }
             else
             {
@@ -342,7 +342,7 @@ bool bamboo::nodes::NodeGraphEvaluationContext::evaluate()
                 assert(outVariablesForSrcNode);
 
                 auto inputVariable = outVariablesForSrcNode->get(inputConnection->m_srcOutput);
-                inputMap->set(name, inputVariable);
+                inputMap->replace(name, inputVariable);
             }
         }
 
@@ -363,12 +363,12 @@ bool bamboo::nodes::NodeGraphEvaluationContext::evaluate()
             if (foundVariable == nullptr)
             {
                 auto newVariable = output->createVariable();
-                variablesForNode->set(name, newVariable);
+                variablesForNode->replace(name, newVariable);
 
                 foundVariable = newVariable;
             }         
 
-            outputMap->set(name, foundVariable);
+            outputMap->replace(name, foundVariable);
         }
 
         bamboo::nodes::Inputs inputs(inputMap);

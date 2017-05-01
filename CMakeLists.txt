@@ -42,6 +42,7 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 # the gtest and gtest_main targets.
 add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
                  ${CMAKE_BINARY_DIR}/googletest-build)
+
 enable_testing()
 
 ################################
@@ -49,14 +50,19 @@ enable_testing()
 ################################
 # Add test cpp file
 add_executable( runUnitTests tests/testgtest.cpp tests/TestNodes_basics.cpp tests/TestNodes.cpp src/Nodes/nodes.cpp)
+set_property(TARGET runUnitTests PROPERTY CXX_STANDARD 17)
+set_target_properties(runUnitTests PROPERTIES COMPILE_FLAGS "/std:c++latest")
+set_target_properties(runUnitTests PROPERTIES COMPILE_DEFINITIONS "GTEST_LANG_CXX11")
+
 # Link test executable against gtest & gtest_main
 target_link_libraries(runUnitTests gtest gtest_main)
 add_test(runUnitTests runUnitTests)
 
 ## Add boost
 if (WIN32)
-  set(BOOST_ROOT "D:/Development/Common-Externals/boost_1_63_0_msvc140-x64/")
-  set(Boost_LIBRARY_DIRS "D:/Development/Common-Externals/boost_1_63_0_msvc140-x64/lib64-msvc-14.0")
+  set(BOOST_ROOT "D:/Development/Common-Externals/boost_1_64_0")
+  set(BOOST_LIBRARYDIR "D:/Development/Common-Externals/boost_1_64_0/lib64-msvc-14.1")
+  set(Boost_LIBRARY_DIRS "D:/Development/Common-Externals/boost_1_64_0/lib64-msvc-14.1")
 endif()
 
 set(Boost_USE_STATIC_LIBS OFF) 
@@ -84,6 +90,11 @@ endif()
 # Add paths for GLEW
 find_package(GLEW REQUIRED)
 include_directories(${GLEW_INCLUDE_DIR})
+
+if (GLEW_FOUND)
+  #find_library(GLEW_LIBRARY NAMES GLEW glew32 glew glew32s PATH_SUFFIXES lib64)
+  MESSAGE("found cmake, GLEW_INCLUDE_DIR=${GLEW_INCLUDE_DIR}, GLEW_LIBRARIES=${GLEW_LIBRARIES}")
+endif()
 
 # Add source/header files
 #file (GLOB HEADER_FILES "include/*.h")
@@ -118,24 +129,32 @@ endforeach()
 
 
 # Make sure we get C++11
-SET(ENABLE_CXX11 "-std=c++1y")
-if(CMAKE_COMPILER_IS_GNUCXX)
-   EXECUTE_PROCESS(COMMAND "${CMAKE_CXX_COMPILER} -dumpversion" OUTPUT_VARIABLE GCC_VERSION)
-   if (GCC_VERSION VERSION_LESS 4.7)
-      SET(ENABLE_CXX11 "-std=c++0x")
-   endif()
-endif()
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+#SET(ENABLE_CXX11 "-std=c++1y")
+#if(CMAKE_COMPILER_IS_GNUCXX)
+#   EXECUTE_PROCESS(COMMAND "${CMAKE_CXX_COMPILER} -dumpversion" OUTPUT_VARIABLE GCC_VERSION)
+#   if (GCC_VERSION VERSION_LESS 4.7)
+#      SET(ENABLE_CXX11 "-std=c++0x")
+#   endif()
+#endif()
+#SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 
 #SET_TARGET_PROPERTIES(BambooEngine PROPERTIES DEBUG_POSTFIX "_d")
 add_executable(BambooEngine ${ALL_FILES_f} ${HEADER_FILES})
-
-target_link_libraries(BambooEngine glfw ${OPENGL_LINK_LIBRARIES} ${GLFW_LIBRARIES} ${GLEW_LIBRARY} ${Boost_LIBRARIES})
+set_property(TARGET BambooEngine PROPERTY CXX_STANDARD 17)
+set_target_properties(BambooEngine PROPERTIES COMPILE_FLAGS "/std:c++latest")
+target_link_libraries(BambooEngine glfw ${OPENGL_LINK_LIBRARIES} ${Boost_LIBRARIES} GLEW::GLEW)
 
 if (WIN32)
     add_custom_command(TARGET BambooEngine POST_BUILD        # Adds a post-build event to MyTest
         COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake - E copy_if_different..."
             "${GLEW_INCLUDE_DIR}/../bin/Release/x64/glew32.dll"      # <--this is in-file
+            $<TARGET_FILE_DIR:BambooEngine>)                 # <--this is out-file path
+endif()
+
+if (WIN32)
+    add_custom_command(TARGET BambooEngine POST_BUILD        # Adds a post-build event to MyTest
+        COMMAND ${CMAKE_COMMAND} -E copy_directory  # which executes "cmake - E copy_if_different..."
+            "${BOOST_LIBRARYDIR}"      # <--this is in-file
             $<TARGET_FILE_DIR:BambooEngine>)                 # <--this is out-file path
 endif()

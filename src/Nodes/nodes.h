@@ -1,3 +1,6 @@
+#ifndef __BAMBOOENGINE_NODES_H_
+#define __BAMBOOENGINE_NODES_H_
+
 #include <vector>
 #include <typeinfo>
 #include <memory>
@@ -5,34 +8,16 @@
 #include <unordered_map>
 #include <cassert>
 
+#include <string>
+#include <string_view>
+
+#include "variables.h"
+
 namespace bamboo
 {
     namespace nodes
     {
         using nodeID = size_t;
-
-        class IVariable
-        {
-        public:
-            IVariable(size_t typeHash) : m_typeHash(typeHash) {};
-            size_t typeHash() const { return m_typeHash; }
-            virtual ~IVariable() {};
-
-        protected:
-            const size_t      m_typeHash;
-        };
-
-        template <class T> class TypedVariable : public IVariable
-        {
-        public:
-            TypedVariable() : IVariable(typeid(T).hash_code()) {};
-
-            T get() const { return m_value; };
-            void set(T value) { m_value = value; };
-
-        private:
-            T m_value;
-        };
 
         class DescriptorBase {
         public:
@@ -80,45 +65,20 @@ namespace bamboo
             std::shared_ptr<IVariable> createTypedVariable() const override final { return std::make_shared<TypedVariable<T>>(); };
         };
 
-        class SharedVariableMap
-        {
-        public:
-            template <typename T> std::shared_ptr<TypedVariable<T>> create(const std::string &name) { m_variables[name] = std::make_shared<TypedVariable<T>>(); return get<T>(name); }
-
-            void set(const std::string &name, std::shared_ptr<IVariable> &v) { m_variables[name] = v; }
-
-            std::shared_ptr<IVariable> get(const std::string& name) { 
-                auto iter = m_variables.find(name);
-                if (iter != m_variables.end())
-                    return iter->second;
-                else
-                    return nullptr;
-            };
-
-            template <typename T> std::shared_ptr<TypedVariable<T>> get(const std::string &name) {
-                auto untyped_variable = get(name);
-                return std::dynamic_pointer_cast<TypedVariable<T>>(untyped_variable);
-            }
-
-        private:
-            std::map<std::string, std::shared_ptr<IVariable>> m_variables;
-        };
-
         class Inputs
         {
         public:
             Inputs(std::shared_ptr<SharedVariableMap> wrappedMap) : m_variables(wrappedMap) {};
             Inputs(std::unique_ptr<SharedVariableMap> &&wrappedMap) : m_variables(std::move(wrappedMap)) {};
 
-            template <typename T> T get(const std::string &name) const
+            template <typename T> T get(std::string_view name) const
             {
                 auto typed_variable_object = m_variables->get<T>(name);
-
                 return typed_variable_object->get();
             }
 
         private:
-            std::shared_ptr<SharedVariableMap> m_variables;
+            const std::shared_ptr<const SharedVariableMap> m_variables;
         };
 
         class Outputs
@@ -126,10 +86,9 @@ namespace bamboo
         public:
             Outputs(std::shared_ptr<SharedVariableMap> wrappedMap) : m_variables(wrappedMap) {};
 
-            template <typename T> void set(const std::string &name, const T &value) const
+            template <typename T> void set(std::string_view name, const T &value) const
             {
                 auto typed_variable_object = m_variables->get<T>(name);
-
                 typed_variable_object->set(value);
             }
 
@@ -147,8 +106,8 @@ namespace bamboo
             const auto& getInputs() const { return m_inputs; };
             const auto& getOutputs() const { return m_outputs; }
 
-            const std::shared_ptr<InputDescriptor> getInput(const std::string &name) const;
-            const std::shared_ptr<OutputDescriptor> getOutput(const std::string &name) const;
+            const std::shared_ptr<InputDescriptor> getInput(std::string_view name) const;
+            const std::shared_ptr<OutputDescriptor> getOutput(std::string_view name) const;
 
             void setName(std::string name) { m_name = name; };
             std::string getName() const { return m_name; }
@@ -194,8 +153,23 @@ namespace bamboo
         public:
             NodeGraphEvaluationContext(std::shared_ptr<NodeGraph> graph) : m_nodeGraph(graph) {};
 
-            //template <typename T> bool setDirectInput(nodeID node, std::string inputName, T value);
-            //template <typename T> T getOutput(nodeID node, std::string outputName);
+            template <typename T> void setDirectInput(nodeID node, std::string inputName, const T& value) {
+                if (m_directInputs[node] == nullptr)
+                    m_directInputs[node] = std::make_shared<SharedVariableMap>();
+
+                auto variable = m_directInputs[node]->get<T>(inputName);
+                if (!variable)
+                    variable = m_directInputs[node]->create<T>(inputName);
+
+                variable->set(value);
+            };
+
+            void clearDirectInput(nodeID node, std::string inputName) {
+                if (m_directInputs[node] == nullptr)
+                    return;
+
+                m_directInputs[node]->remove(inputName);
+            }
 
             bool hasDirectInput(nodeID node, std::string inputName);
            
@@ -263,3 +237,5 @@ namespace bamboo
 
     }
 }
+
+#endif
